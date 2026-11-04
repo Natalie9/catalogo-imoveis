@@ -2,6 +2,12 @@
 
 Use a [planilha online](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit), aba **Imóveis**. Não altere arquivos do repositório para cadastrar casas.
 
+Para corrigir imóveis existentes pela interface, use **Editar informações** depois
+da ativação do [backend do editor](EDITOR.md). Informe a senha, altere os campos
+necessários e salve. O ID permanece fixo. Apagar um campo remove seu valor;
+cancelar não grava nada. Em conflito, confira os valores atuais antes de reaplicar
+o rascunho. Nome e motivo são registros declarados, não identidade autenticada.
+
 1. Leia o anúncio e procure o ID/link antes de inserir. Se já existe, edite a mesma linha. Se parece ser a mesma casa de outra imobiliária, registre a relação nos comentários e confira antes de duplicar.
 2. Preencha A–M, preservando cabeçalhos e validações. Use números em preço, área e quartos. Não invente campos ausentes. M deve conter um ID único e estável.
 3. Em R–V, informe localização, distância e cidade quando confirmadas. Identifique coordenadas aproximadas em Precisão da localização. Se T estiver vazio e houver coordenadas, o site calcula a distância em linha reta até a UFG.

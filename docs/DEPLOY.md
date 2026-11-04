@@ -13,4 +13,9 @@ Imóveis, fotos, localização e avaliações são alterados apenas na planilha.
 
 site/config.js contém ID da planilha, gid de Imóveis, intervalo de consulta e URL do Apps Script. São endereços públicos, sem credenciais.
 
+A evolução de interface deve ser revisada em branch/PR antes de entrar em main.
+O editor exige uma implantação separada: [procedimento completo](EDITOR.md).
+Publicar o frontend não implanta Apps Script nem cria colunas. Preservar a URL
+existente da API evita mudar a configuração pública.
+
 Não use versões antigas de publicar.bat, copiar_do_painel.py ou geradores Python para atualizar esta versão: pertencem ao fluxo antigo com arquivos locais.

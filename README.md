@@ -30,7 +30,15 @@ Não há Excel, CSV ou JSON de imóveis no repositório. O CSV online é process
 
 ## Interface
 
-- site/index.html: interface estática, sem catálogo embutido.
+A evolução inclui filtros principais/avançados, campos numéricos sem limites fixos,
+detalhes, comparação de duas a quatro casas e edição autorizada com controle de
+conflitos. O editor depende da implantação descrita em [EDITOR.md](docs/EDITOR.md).
+Com o backend antigo, a interface informa a dependência sem simular gravação.
+
+- site/index.html: estrutura estática, sem catálogo embutido.
+- site/catalogo.css e site/decision.css: estilos, temas e responsividade.
+- site/catalogo.js: filtros, cards, avaliações e atualização periódica.
+- site/decision.js: detalhes, comparação, editor e reconciliação de correções.
 - site/sheets.js: leitura e normalização das linhas online.
 - site/ghdb.js: avaliações pelo Apps Script existente.
 - site/config.js: identificadores públicos e URL da API, sem credenciais.
@@ -46,6 +54,8 @@ npm run preview
 ~~~
 
 Abra http://127.0.0.1:8000. O preview também lê dados online reais.
+Para revisão visual em um viewport fixo, use `/__preview?width=390` (ou 768, 1024,
+1440). Esse recurso pertence apenas ao servidor local, não à publicação.
 
 A planilha já permitia leitura pública, necessária para este site público. A senha do painel continua necessária para gravar avaliações pelo Apps Script e nunca deve ir para o GitHub. Links de imagens precisam permitir acesso público.
 
