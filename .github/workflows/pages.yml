@@ -3,6 +3,7 @@ name: Publicar no GitHub Pages
 on:
   push:
     branches: [main]
+    paths: ['site/**', 'tests/**', 'package*.json', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
@@ -19,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.12"
-      - run: pip install openpyxl
-      - name: Gerar site/index.html a partir da planilha
-        run: python scripts/gerar_site.py
+          node-version: "24"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

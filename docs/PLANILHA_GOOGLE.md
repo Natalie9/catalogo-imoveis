@@ -1,57 +1,25 @@
-# Planilha Google (Drive) e Apps Script
+# Google Sheets como base
 
-Objetivo: deixar a planilha no Google Drive e usar essa mesma planilha para guardar, ao vivo,
-as notas, os comentários e os descartes que a Natalie e a Jéssica fazem no site.
+A [planilha do catálogo](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit) é a fonte exclusiva dos dados. Nenhum processo deve substituir Imóveis por uma cópia do GitHub.
 
-## 1. A planilha no Drive
+## Leitura e edição
 
-Ela já existe: [Catálogo de Imóveis](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit),
-criada pelo Claude. O conteúdo entra no passo 2: o script copia a aba "Imóveis" do `.xlsx` que está no GitHub.
-Para recriar do zero, crie uma Planilha Google vazia e siga os passos abaixo.
+O navegador consulta a exportação CSV pública de Imóveis e itera sobre suas linhas. R–Z guardam os dados antes mantidos em JSON/fotos locais. Veja os campos em [ARQUITETURA.md](ARQUITETURA.md).
 
-## 2. Instalar o Apps Script
+A leitura pública já estava habilitada. Se for desabilitada, o site indicará falha de acesso. Não amplie permissões de edição para permitir leitura: são permissões distintas.
 
-1. Na Planilha Google, abra **Extensões → Apps Script**.
-2. Apague o conteúdo de `Código.gs` e cole o conteúdo de [`apps_script/Code.gs`](../apps_script/Code.gs).
-3. (A constante `RAW` já aponta para `Natalie9/catalogo-imoveis`; ajuste se o repositório mudar.)
-4. Em **⚙️ Configurações do projeto → Propriedades do script → Adicionar propriedade**, crie
-   `CHAVE` com uma senha à sua escolha. É a "senha do painel" que o site pede na primeira gravação
-   em cada navegador. Passe essa senha para a Jéssica.
-5. Selecione a função `importarTudoDoGitHub` e clique em **Executar**. Na primeira vez, o Google pede
-   autorização. Isso preenche a aba `Imóveis` (da planilha `dados/Catalogo_de_imoveis.xlsx` do repositório, com a formatação) e cria as abas
-   `notas`, `comentarios` e `descartes` (de `dados/avaliacoes.json`). Depois, o menu **Catálogo** da
-   planilha faz o mesmo.
-6. Clique em **Implantar → Nova implantação → ⚙️ App da Web**, com:
-   - Executar como: **Eu**
-   - Quem pode acessar: **Qualquer pessoa**
-7. Copie a URL que termina em `/exec`.
+Use o Sheets ou uma conexão autorizada de edição. ChatGPT/Claude alteram células e conferem o resultado. Automações no GitHub precisam de autenticação própria no Google Sheets, sem commit por mudança de dados.
 
-## 3. Ligar o site
+## Avaliações
 
-Em `site/config.js`:
+O Apps Script configurado continua lendo/gravando notas, comentarios e descartes. A migração da listagem não exige mudar sua implantação. CHAVE, nas propriedades do script, é a senha do painel e nunca deve ser publicada.
 
-```js
-window.CATALOGO_CONFIG = { apiUrl: "https://script.google.com/macros/s/AKfy.../exec", atualizarSegundos: 20 };
-```
+apps_script/Code.gs contém uma versão compatível sem rotinas de importação que sobrescrevem dados. A instalação antiga pode ainda ter o menu **Importar tudo do GitHub**: não o use. Para substituir esse código antigo, abra Extensões → Apps Script, atualize o código e publique uma nova versão na implantação existente, preservando URL e CHAVE. Isso é manutenção do backend, não uma etapa para atualizar imóveis.
 
-Rode `publicar.bat`. A partir daí, o site mostra as estrelas e o campo de comentário habilitados.
+Em instalação nova: cole Code.gs no script vinculado à planilha, configure CHAVE e implante como app da Web (executar como proprietário, acesso público de leitura). A implementação valida a senha antes de gravar avaliações. Configure a URL /exec em site/config.js.
 
-> Se você mudar o `Code.gs`, use **Implantar → Gerenciar implantações → Editar → Nova versão**
-> para a URL continuar a mesma.
+## Migração
 
-## 4. Levar as notas para o .xlsx (opcional)
+As linhas/validações A–Q e as abas de avaliações são preservadas. R–Z recebem localização, distância, cidade e links de fotos. N–Q permanecem como histórico, sem uso pela interface.
 
-As colunas N–Q da planilha local recebem as notas pelo script de sincronização:
-
-```bash
-python scripts/sincronizar.py "https://script.google.com/macros/s/AKfy.../exec"
-```
-
-Ele também grava `avaliacoes.json` e regera os painéis.
-
-## Segurança
-
-- Quem tem a URL `/exec` consegue **ler** as notas. Como o repositório é público, elas já estão lá de qualquer forma.
-- Para **gravar** é preciso a `CHAVE`. Se ela vazar, troque a propriedade no Apps Script. Na tentativa
-  seguinte, o site pede a senha nova.
-- O Apps Script só aceita as pessoas `natalie` e `jessica`, e comentários de até 2000 caracteres.
+Fotos com links originais usam esses links. As que só existiam no repositório usam URLs imutáveis de um commit histórico. Não há cópias de fotos na versão atual. Substituir a URL na planilha atualiza a imagem sem deploy.

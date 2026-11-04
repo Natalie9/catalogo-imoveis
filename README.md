@@ -1,66 +1,52 @@
 # Catálogo de Imóveis
 
-Painel das casas que a Natalie e a Jéssica estão avaliando para comprar em Goiânia/Aparecida.
-Ele mostra preço, tamanho, bairro, distância até a UFG (Campus Samambaia), foto, piscina e
-imobiliária de cada anúncio. Também guarda as notas (estrelas), os comentários e os descartes das duas.
+Painel das casas que Natalie e Jéssica avaliam em Goiânia/Aparecida.
 
-- **Site (GitHub Pages):** `https://natalie9.github.io/catalogo-imoveis/`
-- **Planilha mestre:** `dados/Catalogo_de_imoveis.xlsx`
-- **Planilha Google (Drive):** [Catálogo de Imóveis](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit). Tem a aba `Imóveis` e as notas, comentários e descartes ao vivo
-- **Lista para visitas (PDF):** `dados/Casas_para_visitar.pdf`
+- [Site](https://natalie9.github.io/catalogo-imoveis/)
+- [Base no Google Sheets](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit)
 
-> ⚠️ O repositório é **público**. Ele inclui a planilha completa, os telefones e nomes de corretores
-> e anunciantes, as fotos copiadas dos anúncios e as notas e comentários pessoais. Isso foi
-> escolhido de propósito. Para fechar o acesso, torne o repositório privado (o GitHub Pages
-> em repositório privado exige um plano pago).
+## Atualizar imóveis
 
-## Como funciona
+Edite a aba **Imóveis** da planilha online. O site lê os dados ao abrir, ao voltar para a página e a cada 20 segundos enquanto estiver visível. **Atualizar agora** força outra consulta. O Google pode levar algum tempo para disponibilizar uma edição na exportação.
 
-```
-Documentos/
-├── Catalogo_de_imoveis.xlsx      ← planilha de trabalho (o Claude adiciona as casas aqui)
-├── Painel_imoveis/               ← pasta de trabalho: fotos, scripts, painéis locais
-└── catalogo-imoveis/             ← ESTE repositório
-    ├── site/                     ← o que vai para o GitHub Pages
-    │   ├── index.html            ← gerado por scripts/gerar_site.py (não editar à mão)
-    │   ├── config.js             ← URL do Apps Script (notas ao vivo)
-    │   ├── ghdb.js               ← liga o painel à Planilha Google
-    │   └── fotos/<ID>.webp       ← uma foto por casa
-    ├── dados/
-    │   ├── Catalogo_de_imoveis.xlsx
-    │   ├── dados_painel.json     ← localização, distância e links de fotos por ID
-    │   ├── avaliacoes.json       ← exportação das notas, comentários e descartes
-    │   └── Casas_para_visitar.pdf
-    ├── scripts/                  ← geradores (Python 3 + openpyxl)
-    ├── apps_script/Code.gs       ← backend na Planilha Google
-    ├── docs/                     ← documentação detalhada
-    ├── .github/workflows/pages.yml
-    └── publicar.bat              ← duplo clique: copia, gera, faz o commit e o push
-```
+Adicionar, editar ou remover uma linha **não exige código, commit, computador ligado ou deploy**. ChatGPT, Claude e ferramentas com permissão de edição podem modificar a mesma planilha. O GitHub hospeda a interface; uma automação executada no GitHub também precisa de acesso autorizado ao Sheets para escrever dados.
 
-1. **Casas** saem da planilha (`dados/Catalogo_de_imoveis.xlsx`, aba "Imóveis"). A coluna M é o ID do anúncio.
-2. **Localização e fotos** vêm de `dados/dados_painel.json` e `site/fotos/`.
-3. `scripts/gerar_site.py` junta tudo no `scripts/template.html` e grava `site/index.html`.
-   O GitHub Actions roda esse script a cada push e publica a pasta `site/`.
-4. **Notas, comentários e descartes** ficam numa Planilha Google, nas abas `notas`,
-   `comentarios` e `descartes`, por meio de um Apps Script. O site lê essas abas a cada 20 s.
-   Para gravar, ele pede a "senha do painel". Sem o Apps Script configurado, o site funciona
-   só para leitura e mostra as notas da última sincronização da planilha (colunas N–Q).
+Procure o ID/link antes de cadastrar, evitando duplicatas. Preserve o ID: ele liga a casa às avaliações, independentemente da posição da linha. Veja [como adicionar casas](docs/ADICIONAR_CASAS.md).
 
-## Tarefas comuns
+Fotos são **links** na coluna Fotos: uma URL, uma URL por linha ou um array JSON. Não baixe nem versione imagens novas. Fotos antigas sem link original usam URLs imutáveis de uma versão histórica do repositório; basta substituir o link na planilha para trocar a imagem.
 
-| Quero… | Faço… |
-|---|---|
-| Publicar ou atualizar o site | Duplo clique em `publicar.bat` |
-| Adicionar casas | Mande os links para o Claude. Ele atualiza `Documentos/Painel_imoveis`, e depois é só rodar `publicar.bat`. Veja [docs/ADICIONAR_CASAS.md](docs/ADICIONAR_CASAS.md) |
-| Ligar notas e comentários ao vivo | [docs/PLANILHA_GOOGLE.md](docs/PLANILHA_GOOGLE.md) |
-| Trazer as notas do site para a planilha .xlsx | `python scripts/sincronizar.py "<URL do Apps Script>"` |
-| Gerar o PDF de visitas | `python scripts/pdf_visitas.py site/index.html <pasta_db> dados/Casas_para_visitar.pdf` |
-| Ver o site no computador | `python -m http.server -d site 8000` e abrir http://localhost:8000 |
+## Fontes únicas
 
-Documentação completa:
+| Aba | Conteúdo |
+| --- | --- |
+| Imóveis | Anúncio, localização, distância, cidade e links de fotos |
+| notas | Estrelas por ID da casa e pessoa |
+| comentarios | Comentários por ID da casa |
+| descartes | Casas descartadas no painel |
 
-- [docs/ARQUITETURA.md](docs/ARQUITETURA.md): dados, colunas da planilha, modos do painel e marcadores dos comentários.
-- [docs/DEPLOY.md](docs/DEPLOY.md): GitHub e GitHub Pages, passo a passo.
-- [docs/PLANILHA_GOOGLE.md](docs/PLANILHA_GOOGLE.md): Google Drive e Apps Script.
-- [docs/ADICIONAR_CASAS.md](docs/ADICIONAR_CASAS.md): como as casas entram, IDs e fontes de dados.
+N–Q de Imóveis são registros históricos preservados. O site usa as três abas de avaliações, não esses campos antigos.
+
+Não há Excel, CSV ou JSON de imóveis no repositório. O CSV online é processado em memória. O PDF de visitas em dados/ é um documento histórico, sem participação no site.
+
+## Interface
+
+- site/index.html: interface estática, sem catálogo embutido.
+- site/sheets.js: leitura e normalização das linhas online.
+- site/ghdb.js: avaliações pelo Apps Script existente.
+- site/config.js: identificadores públicos e URL da API, sem credenciais.
+
+O GitHub Actions testa e publica site/ quando muda o código em main. Não gera HTML a partir de dados e não lê planilhas durante o deploy. Só mudanças na interface precisam de publicação.
+
+Para desenvolver com Node.js 24:
+
+~~~sh
+npm ci --ignore-scripts
+npm test
+npm run preview
+~~~
+
+Abra http://127.0.0.1:8000. O preview também lê dados online reais.
+
+A planilha já permitia leitura pública, necessária para este site público. A senha do painel continua necessária para gravar avaliações pelo Apps Script e nunca deve ir para o GitHub. Links de imagens precisam permitir acesso público.
+
+Documentação: [arquitetura](docs/ARQUITETURA.md), [planilha e backend](docs/PLANILHA_GOOGLE.md), [publicação da interface](docs/DEPLOY.md).
