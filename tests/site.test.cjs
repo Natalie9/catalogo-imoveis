@@ -12,7 +12,7 @@ function app(t){
  w.setInterval=fn=>{polls.push(fn);return polls.length};
  w.fetch=async u=>{if(String(u).includes('/export?')){if(fail)throw Error('Sem rede');return {ok:true,text:async()=>csv(rows)}}if(apiFail)throw Error('API indisponível');return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})}};
  for(const f of ['config.js','sheets.js','ghdb.js'])w.eval(fs.readFileSync(path.join(root,f),'utf8'));
- w.eval([...html.matchAll(/<script>([\s\S]*?)<\/script>/g)][0][1]);
+ for(const f of ['catalogo.js','decision.js'])require('node:vm').runInContext(fs.readFileSync(path.join(root,f),'utf8'),dom.getInternalVMContext());
  return {w,dom,polls,setRows:r=>rows=r,setFailure:v=>fail=v,setApiFailure:v=>apiFail=v,refresh:()=>w.document.querySelector('#syncbtn').click()};
 }
 test('site lê e reflete inclusão, edição e exclusão na planilha sem build',async t=>{
