@@ -9,7 +9,7 @@ Gera: site/index.html  (modo "gh": fotos em arquivos, notas/comentários pela Pl
 O GitHub Actions (.github/workflows/pages.yml) roda este script a cada push,
 então basta atualizar a planilha/fotos e fazer commit.
 """
-import os, sys
+import csv, os, sys
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(RAIZ, 'scripts'))
@@ -32,6 +32,14 @@ def main():
             '<meta name="robots" content="noindex">\n'
             + html.replace('<div class="wrap">', '</head>\n<body>\n<div class="wrap">', 1) + '\n</body>\n</html>\n')
     open(os.path.join(SITE, 'index.html'), 'w', encoding='utf-8').write(html)
+    # cópia em CSV da aba "Imóveis" (lida pelo Apps Script para montar a Planilha Google)
+    import openpyxl
+    ws = openpyxl.load_workbook(XLSX, read_only=True, data_only=True)['Imóveis']
+    with open(os.path.join(RAIZ, 'dados', 'Catalogo_de_imoveis.csv'), 'w', encoding='utf-8', newline='') as f:
+        w = csv.writer(f)
+        for r in ws.iter_rows(values_only=True):
+            if any(v is not None for v in r):
+                w.writerow(['' if v is None else v for v in r])
     sem = [x['id'] for x in rows if not x['foto']]
     print(f"site/index.html: {len(rows)} casas; {len(sem)} sem foto salva")
 

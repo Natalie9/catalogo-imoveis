@@ -3,25 +3,24 @@
 Objetivo: deixar a planilha no Google Drive e usar essa mesma planilha para guardar, ao vivo,
 as notas, os comentários e os descartes que a Natalie e a Jéssica fazem no site.
 
-## 1. Subir a planilha para o Drive
+## 1. A planilha no Drive
 
-1. Abra o [drive.google.com](https://drive.google.com) e clique em **Novo → Upload de arquivo**.
-   Escolha `dados/Catalogo_de_imoveis.xlsx`.
-2. Abra o arquivo e use **Arquivo → Salvar como Planilhas Google**. O Apps Script só funciona em
-   Planilha Google, não em .xlsx.
-3. Compartilhe a planilha com a Jéssica, se quiser. Ela pode editar a aba "Imóveis" direto.
+Ela já existe: [Catálogo de Imóveis](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit),
+criada pelo Claude. O conteúdo entra no passo 2: o script copia a aba "Imóveis" do `.xlsx` que está no GitHub.
+Para recriar do zero, crie uma Planilha Google vazia e siga os passos abaixo.
 
 ## 2. Instalar o Apps Script
 
 1. Na Planilha Google, abra **Extensões → Apps Script**.
 2. Apague o conteúdo de `Código.gs` e cole o conteúdo de [`apps_script/Code.gs`](../apps_script/Code.gs).
-3. Na linha `URL_AVALIACOES`, troque `USUARIO_GITHUB` pelo seu usuário do GitHub.
+3. (A constante `RAW` já aponta para `Natalie9/catalogo-imoveis`; ajuste se o repositório mudar.)
 4. Em **⚙️ Configurações do projeto → Propriedades do script → Adicionar propriedade**, crie
    `CHAVE` com uma senha à sua escolha. É a "senha do painel" que o site pede na primeira gravação
    em cada navegador. Passe essa senha para a Jéssica.
-5. Selecione a função `importarDoGitHub` e clique em **Executar**. Na primeira vez, o Google pede
-   autorização. Isso cria as abas `notas`, `comentarios` e `descartes` com o conteúdo de
-   `dados/avaliacoes.json`.
+5. Selecione a função `importarTudoDoGitHub` e clique em **Executar**. Na primeira vez, o Google pede
+   autorização. Isso preenche a aba `Imóveis` (da planilha `dados/Catalogo_de_imoveis.xlsx` do repositório, com a formatação) e cria as abas
+   `notas`, `comentarios` e `descartes` (de `dados/avaliacoes.json`). Depois, o menu **Catálogo** da
+   planilha faz o mesmo.
 6. Clique em **Implantar → Nova implantação → ⚙️ App da Web**, com:
    - Executar como: **Eu**
    - Quem pode acessar: **Qualquer pessoa**

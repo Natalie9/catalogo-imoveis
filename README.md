@@ -4,8 +4,9 @@ Painel das casas que a Natalie e a Jéssica estão avaliando para comprar em Goi
 Ele mostra preço, tamanho, bairro, distância até a UFG (Campus Samambaia), foto, piscina e
 imobiliária de cada anúncio. Também guarda as notas (estrelas), os comentários e os descartes das duas.
 
-- **Site (GitHub Pages):** `https://<usuario>.github.io/catalogo-imoveis/`
-- **Planilha mestre:** `dados/Catalogo_de_imoveis.xlsx` (uma cópia dela fica no Google Drive como Planilha Google)
+- **Site (GitHub Pages):** `https://natalie9.github.io/catalogo-imoveis/`
+- **Planilha mestre:** `dados/Catalogo_de_imoveis.xlsx`
+- **Planilha Google (Drive):** [Catálogo de Imóveis](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit). Tem a aba `Imóveis` e as notas, comentários e descartes ao vivo
 - **Lista para visitas (PDF):** `dados/Casas_para_visitar.pdf`
 
 > ⚠️ O repositório é **público**. Ele inclui a planilha completa, os telefones e nomes de corretores

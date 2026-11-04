@@ -48,5 +48,4 @@ Ou seja: para atualizar o site, basta commitar uma planilha ou fotos novas.
 
 1. Configure a Planilha Google e o Apps Script ([PLANILHA_GOOGLE.md](PLANILHA_GOOGLE.md)).
 2. Cole a URL `/exec` em `site/config.js` (`apiUrl`).
-3. Em `apps_script/Code.gs`, troque `USUARIO_GITHUB` pelo seu usuário.
-4. Rode `publicar.bat` de novo.
+3. Rode `publicar.bat` de novo.

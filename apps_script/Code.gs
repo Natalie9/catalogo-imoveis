@@ -10,7 +10,7 @@
  * Instalação: docs/PLANILHA_GOOGLE.md
  *  1. Planilha > Extensões > Apps Script > cole este arquivo.
  *  2. Configurações do projeto > Propriedades do script > CHAVE = <senha do painel>.
- *  3. Rode importarDoGitHub() uma vez (traz as notas atuais do repositório).
+ *  3. Rode importarTudoDoGitHub() uma vez (traz as casas e as notas atuais do repositório).
  *  4. Implantar > Nova implantação > App da Web
  *     (Executar como: Eu · Quem pode acessar: Qualquer pessoa) e copie a URL /exec
  *     para site/config.js.
@@ -22,8 +22,53 @@ const ABAS = {
   descartes:   ['id', 'casa', 'pessoa', 'quando']
 };
 const PESSOAS = ['natalie', 'jessica'];
-// Ajuste se o repositório tiver outro dono/nome:
-const URL_AVALIACOES = 'https://raw.githubusercontent.com/USUARIO_GITHUB/catalogo-imoveis/main/dados/avaliacoes.json';
+// Pasta dados/ do repositório no GitHub (ajuste se mudar o dono/nome do repositório):
+const RAW = 'https://raw.githubusercontent.com/Natalie9/catalogo-imoveis/main/dados/';
+const URL_AVALIACOES = RAW + 'avaliacoes.json';
+const URL_XLSX = RAW + 'Catalogo_de_imoveis.xlsx';
+
+/** Menu "Catálogo" na planilha. */
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('Catálogo')
+    .addItem('Importar tudo do GitHub', 'importarTudoDoGitHub')
+    .addToUi();
+}
+
+/** Primeira carga: aba "Imóveis" (casas) + abas notas/comentarios/descartes. */
+function importarTudoDoGitHub() {
+  importarImoveisDoGitHub();
+  importarDoGitHub();
+}
+
+/**
+ * Substitui a aba "Imóveis" pela aba de mesmo nome de dados/Catalogo_de_imoveis.xlsx do repositório
+ * (converte o .xlsx numa planilha temporária, copia a aba com a formatação e apaga a temporária).
+ */
+function importarImoveisDoGitHub() {
+  const ss = SpreadsheetApp.getActive();
+  const xlsx = UrlFetchApp.fetch(URL_XLSX).getBlob().getBytes();
+  const b = 'catalogo' + Date.now();
+  const meta = JSON.stringify({ name: 'tmp-importacao-catalogo', mimeType: 'application/vnd.google-apps.spreadsheet' });
+  const ini = Utilities.newBlob('--' + b + '\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n' + meta +
+    '\r\n--' + b + '\r\nContent-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\r\n\r\n').getBytes();
+  const fim = Utilities.newBlob('\r\n--' + b + '--').getBytes();
+  const r = UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+    method: 'post', contentType: 'multipart/related; boundary=' + b, payload: ini.concat(xlsx, fim),
+    headers: { Authorization: 'Bearer ' + ScriptApp.getOAuthToken() }
+  });
+  const id = JSON.parse(r.getContentText()).id;
+  try {
+    const origem = SpreadsheetApp.openById(id).getSheetByName('Imóveis');
+    const nova = origem.copyTo(ss);
+    const velha = ss.getSheetByName('Imóveis');
+    if (velha) ss.deleteSheet(velha);
+    nova.setName('Imóveis');
+    ss.setActiveSheet(nova); ss.moveActiveSheet(1); nova.setFrozenRows(1);
+    ['Página1', 'Sheet1', 'Planilha1'].forEach(n => { const v = ss.getSheetByName(n); if (v && v.getLastRow() === 0) ss.deleteSheet(v); });
+  } finally {
+    DriveApp.getFileById(id).setTrashed(true);
+  }
+}
 
 function aba_(nome) {
   const ss = SpreadsheetApp.getActive();
