@@ -38,3 +38,6 @@ test('avaliações se recuperam de falha inicial sem impedir os imóveis',async 
  await until(()=>a.polls.length);a.polls[0]();await until(()=>d.querySelector('.avalnote')?.textContent.includes('indisponíveis'));
  assert.equal(d.querySelectorAll('.card').length,1);a.setApiFailure(false);a.polls[0]();await until(()=>d.querySelector('.cform'));
 });
+test('páginas não enviam Referer (o OLX bloqueia fotos pedidas a partir do site)',()=>{
+  assert.match(fs.readFileSync(path.join(__dirname,'../site/index.html'),'utf8'),/<meta name="referrer" content="no-referrer">/);
+});
