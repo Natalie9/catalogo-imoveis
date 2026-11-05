@@ -13,27 +13,27 @@
 <script src="ghdb.js?v=decision-2"></script>
 <link rel="stylesheet" href="catalogo.css?v=decision-2">
 <link rel="stylesheet" href="decision.css?v=decision-2">
+<link rel="stylesheet" href="refino.css?v=refino-1">
 
 </head>
 <body>
 <a class="skip" href="#list">Pular para os imóveis</a>
 <div class="wrap">
   <header class="top">
-    <div>
-      <span class="eyebrow">Natalie &amp; Jéssica · Catálogo compartilhado</span><h1>Nossa busca por uma casa</h1>
-      <p class="lede">Acompanhe, avalie e compare as casas que estamos considerando.</p>
-    </div>
-    <div class="f"><label for="theme">Aparência</label><select id="theme"><option value="auto">Sistema</option><option value="light">Clara</option><option value="dark">Escura</option></select></div><div class="stats" id="stats"></div>
+    <div class="topbar"><span class="eyebrow">Natalie &amp; Jéssica · Catálogo compartilhado</span><div class="f theme"><label for="theme" class="sr">Aparência</label><select id="theme"><option value="auto">Tema: sistema</option><option value="light">Tema: claro</option><option value="dark">Tema: escuro</option></select></div></div>
+    <h1>Nossa busca por uma casa</h1>
+    <p class="lede">Acompanhe, avalie e compare as casas que estamos considerando.</p>
+    <div class="stats" id="stats"></div>
   </header>
-  <div class="syncbar" id="syncbar"><span id="syncmsg" role="status" aria-live="polite">Carregando imóveis da planilha…</span><button type="button" id="syncbtn">Atualizar agora</button><a id="sheetlink" target="_blank" rel="noopener">Abrir planilha</a></div>
+  <div class="syncbar" id="syncbar"><span class="pulse" aria-hidden="true"></span><span id="syncmsg" role="status" aria-live="polite">Carregando imóveis da planilha…</span><button type="button" id="syncbtn" class="btn-ghost"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4M4 13a8 8 0 0 0 14.5 4"/><path d="M20 4v6h-6M4 20v-6h6"/></svg>Atualizar agora</button><a id="sheetlink" target="_blank" rel="noopener">Abrir planilha ↗</a></div>
 
   <div class="layout">
   <aside class="sidebar" id="sidebar" aria-label="Filtros">
   <form class="filters" id="filters" onsubmit="return false">
-    <div class="side-head"><h2>Filtros</h2><button type="button" class="closefilters" id="closefilters">Fechar</button></div>
+    <div class="side-head"><h2>Filtros</h2><div class="side-actions"><button type="button" class="reset" id="reset">Limpar filtros</button><button type="button" class="closefilters" id="closefilters">Fechar</button></div></div><p id="filter-error" role="status"></p>
     <div class="side-body">
     <div class="f"><label for="q">Buscar</label><input type="search" id="q" placeholder="bairro, rua, imobiliária…"></div>
-    <div class="grp-f"><h3>Preço</h3><div class="pair"><div class="f"><label for="pmin">Mínimo (R$)</label><input type="text" inputmode="decimal" id="pmin" placeholder="Sem limite"></div><div class="f"><label for="pmax">Máximo (R$)</label><input type="text" inputmode="decimal" id="pmax" placeholder="Sem limite"></div></div></div>
+    <div class="grp-f"><h3>Preço</h3><div class="pair"><div class="f"><label for="pmin">Mínimo</label><span class="money"><span aria-hidden="true">R$</span><input type="text" inputmode="numeric" id="pmin" placeholder="Sem limite" autocomplete="off"></span></div><div class="f"><label for="pmax">Máximo</label><span class="money"><span aria-hidden="true">R$</span><input type="text" inputmode="numeric" id="pmax" placeholder="Sem limite" autocomplete="off"></span></div></div></div>
     <fieldset class="f seg" id="qmin"><legend>Quartos</legend><div class="segbtns"><label><input type="radio" name="qmin" value="0" checked><span>Qualquer</span></label><label><input type="radio" name="qmin" value="2"><span>2+</span></label><label><input type="radio" name="qmin" value="3"><span>3+</span></label><label><input type="radio" name="qmin" value="4"><span>4+</span></label></div></fieldset>
     <div class="f"><label for="bai">Bairro</label><select id="bai"></select></div>
     <div class="grp-f"><h3>Área</h3><fieldset class="f seg" id="area"><legend>Tipo de área</legend><div class="segbtns"><label><input type="radio" name="area" value="lote" checked><span>Lote</span></label><label><input type="radio" name="area" value="construida"><span>Construída</span></label></div></fieldset><div class="pair"><div class="f"><label for="lmin">Mínima (m²)</label><input type="text" inputmode="decimal" id="lmin" placeholder="Sem limite"></div><div class="f"><label for="lmax">Máxima (m²)</label><input type="text" inputmode="decimal" id="lmax" placeholder="Sem limite"></div></div></div>
@@ -43,23 +43,24 @@
     <div class="f"><label for="pool">Piscina</label><select id="pool"><option value="">Qualquer</option><option value="sim">Com piscina</option><option value="prev">Com piscina ou espaço p/ piscina</option></select></div>
     <label class="chk"><input type="checkbox" id="noalert"> Esconder ágio e alertas</label><label class="chk"><input type="checkbox" id="onlynat"> Só com comentário meu</label>
     </div>
-    <div class="filter-footer"><button type="button" class="reset" id="reset">Limpar filtros</button><span id="filter-error" role="status"></span></div>
-  </form>
+      </form>
   </aside>
   <div class="backdrop" id="backdrop"></div>
   <main>
     <div class="toolbar">
+      <h2 class="count" id="count" aria-live="polite"></h2>
       <button type="button" class="openfilters" id="openfilters" aria-controls="sidebar" aria-expanded="false">Filtros <span id="activefilters"></span></button>
       <div class="f"><label for="sort">Ordenar por</label><select id="sort"><option value="p">Menor preço</option><option value="pd">Maior preço</option><option value="l">Maior tamanho</option><option value="la">Menor tamanho</option><option value="nota">Maior nota (média das duas)</option><option value="notaa">Menor nota</option><option value="km">Mais perto da UFG</option><option value="r">Sem critério (só ordem de adição)</option></select></div>
       <div class="f"><label for="ord">Adicionadas na planilha</label><select id="ord"><option value="antigas">Mais antigas primeiro</option><option value="novas">Mais recentes primeiro</option></select></div>
       <div class="f"><label for="grp">Agrupar</label><select id="grp"><option value="">Sem agrupar</option><option value="imob">Por imobiliária</option><option value="nat">Por estrelas da Natalie</option><option value="jes">Por estrelas da Jéssica</option><option value="bai">Por bairro</option><option value="preco">Por faixa de preço</option><option value="tam">Por faixa de tamanho</option></select></div>
-      <span class="count" id="count" role="status"></span>
     </div>
     <section id="list" aria-label="Casas" tabindex="-1"></section>
   </main>
   </div>
   <p class="note" id="note"></p>
 </div>
+
+  <dialog id="coms-drawer" class="drawer" aria-labelledby="coms-title"><div class="drawer-head"><h2 id="coms-title" tabindex="-1"></h2><button type="button" id="coms-close" aria-label="Fechar comentários">✕</button></div><div class="drawer-body" id="coms-body"></div></dialog>
 
 <script src="catalogo.js?v=decision-2"></script>
 <script src="decision.js?v=decision-2"></script>

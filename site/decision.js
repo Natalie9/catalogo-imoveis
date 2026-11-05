@@ -57,7 +57,7 @@
     content.innerHTML=`<p class="muted">${esc(d.cid||missing)} · ${esc(id)}</p>
       <div class="detail-gallery">${d.img.length?d.img.map((src,i)=>`<a href="${esc(src)}" target="_blank" rel="noopener" aria-label="Abrir foto ${i+1}"><img src="${esc(src)}" loading="lazy" alt="Foto ${i+1} do anúncio em ${esc(d.b)}"></a>`).join(''):'<p>Sem foto disponível</p>'}</div>
       <h3>Informações do anúncio</h3><p class="muted">Dados informados; confirmação e origem aparecem abaixo quando registradas.</p><dl class="property-facts">${fields.slice(0,15).map(([label,get])=>`<div><dt>${esc(label)}</dt><dd>${esc(get(d)||missing)}</dd></div>`).join('')}<div><dt>Precisão da localização</dt><dd>${esc(d.gp)}</dd></div></dl>
-      <h3>Avaliação compartilhada</h3><p>${ratingDifference(d)}</p><div class="aval" data-id="${id}">${avalHTML(d)}</div>
+      <h3>Avaliação compartilhada</h3><p>${ratingDifference(d)}</p><div class="aval" data-id="${id}">${avalFullHTML(d)}</div>
       ${d.nat?`<p>Comentário histórico de Natalie: ${esc(d.nat)}</p>`:''}
       <h3>Alertas e verificações</h3><p>${esc(fields.at(-1)[1](d))}</p><p class="muted">Alertas por palavras-chave são indícios a conferir.</p>
       <dl class="property-facts">${[['Endereço',d.rua],['Imobiliária',d.i],['Contato',d.c],['Observações do anúncio',d.com],['Informações confirmadas',d.confirmed],['Pendências',d.pending],['Ágio',d.agio],['Data da conferência',d.checked],['Fonte da conferência',d.source]].map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v||missing)}</dd></div>`).join('')}</dl>
