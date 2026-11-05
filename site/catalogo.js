@@ -15,7 +15,7 @@ const isAlert=d=>d.tags.some(t=>t[0]==="bad");
 
 /* ---------- estado e filtros ---------- */
 const PMIN=null,PMAX=null,LMIN=null,LMAX=null;
-const DEF={q:"",pmin:PMIN,pmax:PMAX,lmin:LMIN,lmax:LMAX,imob:"",bai:"",pool:"",qmin:"0",sort:"p",noalert:false,onlynat:false,nmin:"0",grp:"",natmin:"0",jesmin:"0",fin:"",area:"lote"};
+const DEF={q:"",pmin:PMIN,pmax:PMAX,lmin:LMIN,lmax:LMAX,imob:"",bai:"",pool:"",qmin:"0",sort:"p",ord:"antigas",noalert:false,onlynat:false,nmin:"0",grp:"",natmin:"0",jesmin:"0",fin:"",area:"lote"};
 let S={...DEF};
 let UI_BOUND=false;
 try{Object.assign(S,JSON.parse(localStorage.getItem("cat-filtros")||"{}"))}catch(e){}
@@ -24,10 +24,10 @@ if(!S.version){if(S.pmin===100000)S.pmin=null;if(S.pmax===700000)S.pmax=null;if(
 function save(){try{localStorage.setItem("cat-filtros",JSON.stringify(S))}catch(e){}}
 function bindUI(){
   fillSelects();
-  for(const key of Object.keys(DEF)){const el=$("#"+key);if(el){if(el.type==="checkbox")el.checked=!!S[key];else el.value=S[key]??""}}
+  for(const key of Object.keys(DEF)){const el=$("#"+key);if(el){if(el.type==="checkbox")el.checked=!!S[key];else if(el.classList.contains("seg"))el.querySelectorAll("input").forEach(r=>{r.checked=r.value===String(S[key])});else el.value=S[key]??""}}
   if(UI_BOUND)return; UI_BOUND=true;
   const up=()=>{
-    for(const key of Object.keys(DEF)){const el=$("#"+key);if(!el)continue;S[key]=el.type==="checkbox"?el.checked:["pmin","pmax","lmin","lmax"].includes(key)?CatalogoSheets.number(el.value):el.value}
+    for(const key of Object.keys(DEF)){const el=$("#"+key);if(!el)continue;S[key]=el.type==="checkbox"?el.checked:el.classList.contains("seg")?(el.querySelector("input:checked")?.value??DEF[key]):["pmin","pmax","lmin","lmax"].includes(key)?CatalogoSheets.number(el.value):el.value}
     save();render();
   };
   for(const key of Object.keys(DEF))$("#"+key)?.addEventListener("input",up);
@@ -67,8 +67,8 @@ function filtered(){
       else if(m==null||m<+S.nmin)return false}
     return true});
   const big=1e12;
-  const k={nota:d=>-((media(d.id)??-1)*10+nRaters(d.id)),km:d=>d.km??big,p:d=>d.p??big,pd:d=>-(d.p??-big),l:d=>-((S.area==="construida"?d.built:d.lot)??-big),la:d=>(S.area==="construida"?d.built:d.lot)??big,notaa:d=>{const m=media(d.id);return m==null?big:m*10-nRaters(d.id)},r:d=>d.r}[S.sort];
-  return a.sort((x,y)=>(k||((d)=>d.r))(x)-(k||((d)=>d.r))(y)||x.r-y.r);
+  const k={nota:d=>-((media(d.id)??-1)*10+nRaters(d.id)),km:d=>d.km??big,p:d=>d.p??big,pd:d=>-(d.p??-big),l:d=>-((S.area==="construida"?d.built:d.lot)??-big),la:d=>(S.area==="construida"?d.built:d.lot)??big,notaa:d=>{const m=media(d.id);return m==null?big:m*10-nRaters(d.id)}}[S.sort];
+  return a.sort((x,y)=>(k||((d)=>0))(x)-(k||((d)=>0))(y)||(S.ord==="novas"?y.r-x.r:x.r-y.r));
 }
 
 /* ---------- resumo ---------- */
