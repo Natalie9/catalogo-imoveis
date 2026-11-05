@@ -97,8 +97,8 @@
     if(c){const id=c.dataset.compare;if(selected.has(id))selected.delete(id);else if(selected.size<4)selected.add(id);else{say('Compare no máximo quatro casas. Remova uma para incluir outra.');return;}syncCompare();if(current?.mode==='compare')paintComparison();}
   });
   function filterStatus(){
-    const count=Object.keys(DEF).filter(k=>!['sort','grp','area'].includes(k)&&String(S[k]??'')!==String(DEF[k]??'')).length;
-    $('#activefilters').textContent=count?'· '+count+' filtro(s) ativo(s)':'';
+    const count=Object.keys(DEF).filter(k=>!['sort','ord','grp','area'].includes(k)&&String(S[k]??'')!==String(DEF[k]??'')).length;
+    $('#activefilters').textContent=count?'('+count+')':'';
     const errors=[];for(const [min,max,label] of [['pmin','pmax','preço'],['lmin','lmax','área']]){
       if(S[min]!=null&&S[max]!=null&&S[min]>S[max])errors.push('O mínimo de '+label+' supera o máximo.');
       for(const key of [min,max]){const input=$('#'+key),bad=input.value.trim()!==''&&(CatalogoSheets.number(input.value)==null||CatalogoSheets.number(input.value)<0);input.setAttribute('aria-invalid',String(bad));if(bad)errors.push('Informe '+label+' válido e não negativo.');}
@@ -111,8 +111,17 @@
   $('#theme').value=theme;applyTheme();$('#theme').addEventListener('change',e=>{theme=e.target.value;applyTheme();try{localStorage.setItem('cat-theme',theme);}catch(_){}});
   // A preferência de autora torna explícito a quem o filtro “meu” se refere.
   const viewer=document.createElement('div');viewer.className='f';viewer.innerHTML='<label for="viewer">Meus comentários: identificar como</label><select id="viewer"><option value="natalie">Natalie</option><option value="jessica">Jéssica</option></select>';
-  document.querySelector('.advanced-grid').append(viewer);$('#viewer').value=ME;
+  document.querySelector('#noalert').closest('.chk').before(viewer);$('#viewer').value=ME;
   $('#viewer').addEventListener('change',e=>{ME=e.target.value;try{localStorage.setItem('cat-pessoa',ME);}catch(_){}render();});
   document.addEventListener('change',e=>{if(e.target.closest('.cform select')){$('#viewer').value=ME;if(S.onlynat)render();}});
   filterStatus();syncCompare();
+})();
+
+(function(){
+  const sb=document.getElementById('sidebar'),bd=document.getElementById('backdrop'),ob=document.getElementById('openfilters');
+  const set=open=>{sb.classList.toggle('open',open);bd.classList.toggle('open',open);ob.setAttribute('aria-expanded',String(open));if(open)sb.querySelector('input,select')?.focus();else if(document.activeElement&&sb.contains(document.activeElement))ob.focus();};
+  ob.addEventListener('click',()=>set(true));
+  document.getElementById('closefilters').addEventListener('click',()=>set(false));
+  bd.addEventListener('click',()=>set(false));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sb.classList.contains('open'))set(false);});
 })();

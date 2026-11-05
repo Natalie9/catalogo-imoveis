@@ -23,7 +23,7 @@ test('filtro de preço exclui desconhecidos quando há faixa e aceita valores al
  a.input('#pmin','');a.input('#pmax','100.000');assert.equal(a.d.querySelector('.idtag').textContent,'C');a.d.querySelector('#reset').click();assert.equal(a.d.querySelectorAll('.card').length,3);
 });
 test('lote e área construída não se misturam no filtro',async t=>{
- const a=app(t),r=row('A');r[25]='construída';a.setRows([r,row('B')]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===2);a.input('#lmin','200');assert.equal(a.d.querySelector('.idtag').textContent,'B');a.input('#area','construida');assert.equal(a.d.querySelector('.idtag').textContent,'A');
+ const a=app(t),r=row('A');r[25]='construída';a.setRows([r,row('B')]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===2);a.input('#lmin','200');assert.equal(a.d.querySelector('.idtag').textContent,'B');a.d.querySelector('#area input[value=construida]').click();assert.equal(a.d.querySelector('.idtag').textContent,'A');
 });
 test('comentário meu respeita autora, filtros individuais e estatísticas reagem às notas',async t=>{
  const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("COMS={A:[{pessoa:'jessica',texto:'texto'}],B:[{pessoa:'natalie',texto:'texto'}]};NOTAS={A:{jessica:5},B:{natalie:4,jessica:3}};ME='natalie';S.onlynat=true;render()");assert.equal(a.d.querySelector('.idtag').textContent,'B');assert.match(a.d.querySelector('#stats').textContent,/1pelas duas/);a.eval("S.onlynat=false;S.natmin='sem';render()");assert.equal(a.d.querySelector('.idtag').textContent,'A');
@@ -72,4 +72,16 @@ test('nota é salva sem pedir senha do painel',async t=>{
 });
 test('casa descartada some da lista e não há filtro para mostrá-la',async t=>{
  const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("DESC={A:{pessoa:'natalie'}};S.showdisc=true;render()");assert.equal(a.d.querySelectorAll('.card').length,1);assert.equal(a.d.querySelector('.idtag').textContent,'B');assert.equal(a.d.querySelector('#showdisc'),null);
+});
+test('ordem de adição desempata o critério e pode inverter a lista',async t=>{
+ const a=app(t);a.setRows([row('A'),row('B'),row('C')]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===3);
+ const ids=()=>[...a.d.querySelectorAll('.idtag')].map(e=>e.textContent).join('');
+ assert.equal(ids(),'ABC');a.input('#ord','novas');assert.equal(ids(),'CBA');
+ a.input('#sort','r');assert.equal(ids(),'CBA');a.input('#ord','antigas');assert.equal(ids(),'ABC');
+});
+test('quartos funciona como controle segmentado e conta como filtro ativo',async t=>{
+ const a=app(t);await until(()=>a.d.querySelectorAll('.card').length>0);
+ a.d.querySelector('#qmin input[value="4"]').dispatchEvent(new a.w.Event('input',{bubbles:true}));
+ a.d.querySelector('#qmin input[value="4"]').checked=true;a.d.querySelector('#qmin').dispatchEvent(new a.w.Event('input',{bubbles:true}));
+ assert.equal(a.eval('S.qmin'),'4');assert.match(a.d.querySelector('#activefilters').textContent,/1/);
 });
