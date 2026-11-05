@@ -30,15 +30,14 @@ Não há Excel, CSV ou JSON de imóveis no repositório. O CSV online é process
 
 ## Interface
 
-A evolução inclui filtros principais/avançados, campos numéricos sem limites fixos,
-detalhes, comparação de duas a quatro casas e edição autorizada com controle de
-conflitos. O editor depende da implantação descrita em [EDITOR.md](docs/EDITOR.md).
-Com o backend antigo, a interface informa a dependência sem simular gravação.
+A interface tem filtros principais/avançados, detalhes de cada casa e comparação
+de duas a quatro casas. Correções de dados são feitas direto na planilha: o botão
+**Editar na planilha** abre a linha da casa.
 
 - site/index.html: estrutura estática, sem catálogo embutido.
 - site/catalogo.css e site/decision.css: estilos, temas e responsividade.
 - site/catalogo.js: filtros, cards, avaliações e atualização periódica.
-- site/decision.js: detalhes, comparação, editor e reconciliação de correções.
+- site/decision.js: detalhes e comparação.
 - site/sheets.js: leitura e normalização das linhas online.
 - site/ghdb.js: avaliações pelo Apps Script existente.
 - site/config.js: identificadores públicos e URL da API, sem credenciais.

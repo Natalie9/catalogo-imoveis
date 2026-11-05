@@ -44,23 +44,14 @@ de área. Faixa de preço ativa exclui registros sem preço. Limites vazios não
 cortes. As estatísticas dizem respeito aos resultados filtrados, e notas indisponíveis
 aparecem como desconhecidas.
 
-## Editor e comparação
+## Detalhes e comparação
 
 `catalogo.js` conserva os contratos globais existentes e o ciclo de atualização;
-`decision.js` acrescenta painéis nativos dialog, comparação por ID e editor.
-Carregamento: config → sheets → ghdb → catalogo → decision. O polling consulta o
-gancho `CatalogoDecision.reconcile` após a leitura CSV. Dados de comparação e
-correções confirmadas ficam somente na memória da página. Rascunhos de comentário
-também ficam na sessão e são restaurados ao alterar filtros.
-
-O editor usa o snapshot autorizado do backend, não o número da linha nem dados
-CSV potencialmente atrasados para definir a versão. A gravação usa os arquivos
-Code.gs + Properties.gs e API avançada Sheets para células e histórico na mesma
-transação. A aba historico_imoveis é criada na primeira correção. N–Q, IDs e
-coleções de avaliações não fazem parte dos campos editáveis.
-
-Veja [EDITOR.md](EDITOR.md) para contratos, autorização, implantação, colunas
-opcionais, recuperação e limites de concorrência com edições diretas no Sheets.
+`decision.js` acrescenta painéis nativos dialog e comparação por ID.
+Carregamento: config → sheets → ghdb → catalogo → decision. A seleção de comparação
+fica somente na memória da página. Rascunhos de comentário também ficam na sessão e
+são restaurados ao alterar filtros. Não há edição pelo site: correções são feitas
+na planilha.
 
 ## Avaliações
 

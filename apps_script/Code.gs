@@ -52,12 +52,6 @@ function json_(o) {
 }
 
 function doGet(e) {
-  const op=e && e.parameter && e.parameter.op;
-  if(op==='capabilities')return json_({ok:true,propertyEditor:editorEnabled_(),contract:1});
-  if(op==='property'){
-    try{return json_({ok:true,property:propertySnapshot_(e.parameter.id,false)});}
-    catch(err){return propertyError_(err);}
-  }
   const out = {};
   Object.keys(ABAS).forEach(n => { out[n] = ler_(n); });
   out.quando = new Date().toISOString();
@@ -69,13 +63,6 @@ function doPost(e) {
   try { b = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, erro: 'json' }); }
   const chave = PropertiesService.getScriptProperties().getProperty('CHAVE');
   if (!chave || b.chave !== chave) return json_({ ok: false, erro: 'chave' });
-  if (b.op === 'readProperty' || b.op === 'updateProperty') {
-    try {
-      if(!editorEnabled_())throw new Error('editor_desativado');
-      if(b.op==='readProperty')return json_({ok:true,property:propertySnapshot_(b.id,true)});
-      return json_(updateProperty_(b));
-    } catch(err){return propertyError_(err);}
-  }
   if (!ABAS[b.col]) return json_({ ok: false, erro: 'coleção' });
   const id = String(b.id || '').slice(0, 200);
   if (!id) return json_({ ok: false, erro: 'id' });

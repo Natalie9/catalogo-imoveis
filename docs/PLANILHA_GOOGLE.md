@@ -12,11 +12,6 @@ Use o Sheets ou uma conexão autorizada de edição. ChatGPT/Claude alteram cél
 
 ## Avaliações
 
-O editor da nova interface precisa dos dois arquivos Apps Script e de ativação
-explícita; veja [EDITOR.md](EDITOR.md). Essa mudança de backend ainda não foi
-implantada por esta entrega. Cadastro/edição direta no Sheets e avaliações antigas
-continuam independentes. Não habilite edição pública da planilha para usar o editor.
-
 O Apps Script configurado continua lendo/gravando notas, comentarios e descartes. A migração da listagem não exige mudar sua implantação. CHAVE, nas propriedades do script, é a senha do painel e nunca deve ser publicada.
 
 apps_script/Code.gs contém uma versão compatível sem rotinas de importação que sobrescrevem dados. A instalação antiga pode ainda ter o menu **Importar tudo do GitHub**: não o use. Para substituir esse código antigo, abra Extensões → Apps Script, atualize o código e publique uma nova versão na implantação existente, preservando URL e CHAVE. Isso é manutenção do backend, não uma etapa para atualizar imóveis.

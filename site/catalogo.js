@@ -11,6 +11,7 @@ function pcol(p){if(p==null)return "var(--off)";return p<PB[0]?"var(--p1)":p<PB[
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 function pcolHex(p){const m={"var(--p1)":"--p1","var(--p2)":"--p2","var(--p3)":"--p3","var(--p4)":"--p4","var(--off)":"--off"};return cssVar(m[pcol(p)])}
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sheetRow=d=>"https://docs.google.com/spreadsheets/d/"+window.CATALOGO_CONFIG.spreadsheetId+"/edit#gid="+window.CATALOGO_CONFIG.imoveisGid+"&range=A"+d.r;
 const isAlert=d=>d.tags.some(t=>t[0]==="bad");
 
 /* ---------- estado e filtros ---------- */
@@ -101,7 +102,7 @@ function refreshAval(id){
     const d=DATA.find(x=>x.id===id);if(!d)return;
     if(sw&&cs){sw.innerHTML=PESSOAS.map(p=>starsHTML(id,p)).join("")+mediaTxt(id);cs.innerHTML=comsHTML(id);const summary=el.querySelector('.comments summary');if(summary)summary.textContent='Comentários e conversa ('+(COMS[id]||[]).length+')'} else el.innerHTML=avalHTML(d)});
 }
-function typing(){return !!window.CatalogoDecision?.editing() || [...document.querySelectorAll(".cform textarea")].some(t=>t.value.trim()||t===document.activeElement)}
+function typing(){return [...document.querySelectorAll(".cform textarea")].some(t=>t.value.trim()||t===document.activeElement)}
 let pendingRender=false;
 function softRender(changedIds,structural){
   if(structural){ if(typing()){pendingRender=true; changedIds.forEach(refreshAval);} else render(); }
@@ -170,7 +171,7 @@ function card(d){
   const chips=[];
   {const n=imobNome(d);chips.push(`<span class="chip imob" title="Imobiliária / anunciante: ${esc(d.i||"não informado")}">${esc(n===SEMIMOB?"Sem imobiliária":n)}</span>`)}
   if(d.km!=null)chips.push(`<span class="chip dist" title="Distância em linha reta até o Campus Samambaia">${d.km.toLocaleString("pt-BR")} km da UFG · linha reta</span>`);
-  if(d.cid!=="Goiânia")chips.push(`<span class="chip">${esc(d.cid)}</span>`);
+  if(d.cid&&d.cid!=="Goiânia")chips.push(`<span class="chip">${esc(d.cid)}</span>`);
   d.tags.forEach(t=>chips.push(`<span class="chip ${t[0]}">${esc(t[1])}</span>`));
   if(d.st&&d.st!=="Em avaliação")chips.push(`<span class="chip bad">${esc(d.st)}</span>`);
   const com=(d.com||"").replace(/Comentário da Natalie:\s*[“"][^”"]+[”"]\.?\s*/,"");
@@ -184,7 +185,7 @@ function card(d){
     ${chips.length?`<div class="chips">${chips.join("")}</div>`:""}
     
     <div class="aval" data-id="${d.id}">${avalHTML(d)}</div>
-    <div class="card-actions"><button type="button" data-detail="${d.id}">Ver detalhes</button><button type="button" data-edit="${d.id}">Editar informações</button><button type="button" data-compare="${d.id}" aria-pressed="false">Comparar</button></div>
+    <div class="card-actions"><button type="button" data-detail="${d.id}">Ver detalhes</button><a href="${esc(sheetRow(d))}" target="_blank" rel="noopener">Editar na planilha</a><button type="button" data-compare="${d.id}" aria-pressed="false">Comparar</button></div>
     <div class="foot"><a class="go" href="${esc(d.u)}" target="_blank" rel="noopener">Abrir anúncio</a><span class="src">${esc(d.s)} · <span class="idtag">${esc(d.id)}</span></span></div>
     ${d.st!=="Rejeitado"?`<div class="foot"><button type="button" class="disc" data-id="${d.id}">${DESC[d.id]?"Voltar para a lista":"Descartar esta casa"}</button>${DESC[d.id]?`<span class="avalnote">descartada por ${esc(NOMES[DESC[d.id].pessoa]||"alguém")} em ${dataBR(DESC[d.id].quando)}</span>`:""}</div>`:""}
   </div></article>`;
@@ -244,7 +245,7 @@ let refreshing=false,refreshTimer=null,lastUpdated=null,lastWarnings=[];
 function catalogMessage(){
   const msg=$("#syncmsg");msg.classList.toggle("err",CATALOG_STATE==="error");
   if(CATALOG_STATE==="error")msg.textContent=(CATALOG_LOADED?"Não foi possível atualizar; exibindo a última leitura de "+lastUpdated.toLocaleTimeString("pt-BR")+". ":"Não foi possível carregar a planilha. ")+CATALOG_ERROR;
-  else if(PENDING_DATA)msg.textContent="Há atualizações na planilha. Termine seu comentário ou feche o editor para atualizar a lista.";
+  else if(PENDING_DATA)msg.textContent="Há atualizações na planilha. Termine seu comentário para atualizar a lista.";
   else if(lastUpdated)msg.textContent="Planilha consultada às "+lastUpdated.toLocaleTimeString("pt-BR")+". "+(lastWarnings.length?lastWarnings.join(" "):"Atualização automática ativada.");
 }
 async function refreshHouses(){
@@ -253,7 +254,7 @@ async function refreshHouses(){
   try{
     const c=window.CATALOGO_CONFIG||{};
     const rows=await CatalogoSheets.read(c,c.imoveisGid,AbortSignal.timeout(25000));
-    let result=CatalogoSheets.houses(rows);if(window.CatalogoDecision)result=await window.CatalogoDecision.reconcile(result);CATALOG_STATE="ready";lastUpdated=new Date();lastWarnings=result.warnings;
+    const result=CatalogoSheets.houses(rows);CATALOG_STATE="ready";lastUpdated=new Date();lastWarnings=result.warnings;
     if(typing()&&CATALOG_LOADED&&JSON.stringify(DATA)!==JSON.stringify(result.data))PENDING_DATA=result;
     else {PENDING_DATA=null;applyHouses(result)}
   }catch(e){CATALOG_STATE="error";CATALOG_ERROR=e.message;console.warn("imóveis",e);if(!CATALOG_LOADED)render()}
