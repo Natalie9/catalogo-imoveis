@@ -15,7 +15,7 @@ const isAlert=d=>d.tags.some(t=>t[0]==="bad");
 
 /* ---------- estado e filtros ---------- */
 const PMIN=null,PMAX=null,LMIN=null,LMAX=null;
-const DEF={q:"",pmin:PMIN,pmax:PMAX,lmin:LMIN,lmax:LMAX,imob:"",bai:"",pool:"",qmin:"0",sort:"p",noalert:false,onlynat:false,showdisc:false,nmin:"0",grp:"",natmin:"0",jesmin:"0",fin:"",area:"lote"};
+const DEF={q:"",pmin:PMIN,pmax:PMAX,lmin:LMIN,lmax:LMAX,imob:"",bai:"",pool:"",qmin:"0",sort:"p",noalert:false,onlynat:false,nmin:"0",grp:"",natmin:"0",jesmin:"0",fin:"",area:"lote"};
 let S={...DEF};
 let UI_BOUND=false;
 try{Object.assign(S,JSON.parse(localStorage.getItem("cat-filtros")||"{}"))}catch(e){}
@@ -60,7 +60,7 @@ function filtered(){
     if(+S.qmin&&!(d.q>=+S.qmin))return false;
     if(S.noalert&&isAlert(d))return false;
     if(S.onlynat&&!(ME==="natalie"&&d.nat)&&!(COMS[d.id]||[]).some(c=>c.pessoa===ME))return false;
-    if(!S.showdisc&&isGone(d))return false;
+    if(isGone(d))return false;
     if(S.nmin&&S.nmin!=="0"){const m=media(d.id),n=nRaters(d.id);
       if(S.nmin==="sem"){if(m!=null)return false}
       else if(S.nmin==="duas"){if(n<2)return false}
@@ -73,8 +73,8 @@ function filtered(){
 
 /* ---------- resumo ---------- */
 function stats(a){
-  const ready=DBSTATE==="ready", active=a.filter(d=>!isGone(d));
-  const items=[[active.length,"ativos"],[ready?a.filter(d=>nRaters(d.id)>0).length:"—","já avaliados"],[ready?a.filter(d=>nRaters(d.id)===2).length:"—","pelas duas"],[ready?a.filter(d=>nRaters(d.id)===0).length:"—","sem avaliação"],[ready?a.filter(isGone).length:"—","descartados"]];
+  const ready=DBSTATE==="ready";
+  const items=[[a.length,"ativos"],[ready?a.filter(d=>nRaters(d.id)>0).length:"—","já avaliados"],[ready?a.filter(d=>nRaters(d.id)===2).length:"—","pelas duas"],[ready?a.filter(d=>nRaters(d.id)===0).length:"—","sem avaliação"]];
   $("#stats").innerHTML='<p class="stats-scope">Nos resultados filtrados'+(ready?'':' · avaliações indisponíveis')+'</p>'+items.map(([n,label])=>'<div class="stat"><b>'+n+'</b><span>'+label+'</span></div>').join('');
 }
 
