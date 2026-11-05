@@ -60,6 +60,6 @@ Abra http://127.0.0.1:8000. O preview também lê dados online reais.
 Para revisão visual em um viewport fixo, use `/__preview?width=390` (ou 768, 1024,
 1440). Esse recurso pertence apenas ao servidor local, não à publicação.
 
-A planilha já permitia leitura pública, necessária para este site público. A senha do painel continua necessária para gravar avaliações pelo Apps Script e nunca deve ir para o GitHub. Links de imagens precisam permitir acesso público.
+A planilha já permitia leitura pública, necessária para este site público. Não há senha do painel: notas, comentários e descartes são gravados direto pelo Apps Script. Links de imagens precisam permitir acesso público.
 
 Documentação: [arquitetura](docs/ARQUITETURA.md), [planilha e backend](docs/PLANILHA_GOOGLE.md), [publicação da interface](docs/DEPLOY.md).
