@@ -6,20 +6,13 @@
  *   DB.collection("comentarios").add(obj)
  * Este arquivo imita essa interface usando a Planilha Google + Apps Script (apps_script/Code.gs):
  *   GET  <apiUrl>?op=all                  -> {notas:[...], comentarios:[...], descartes:[...]}
- *   POST <apiUrl>  {op, col, id, data, chave}   (op = set | delete)
- * As leituras são abertas; as gravações pedem a "senha do painel" (Script Property CHAVE),
- * mantida somente na memória desta página após ser digitada.
+ *   POST <apiUrl>  {op, col, id, data}   (op = set | delete)
+ * Leituras e gravações são abertas: não há senha do painel.
  */
 (function () {
   const COLS = ["notas", "comentarios", "descartes"];
-  const KEY = "cat-chave";
-  let sessionKey = null;
-  const ls = {
-    get: k => { try { return localStorage.getItem(k) } catch (e) { return null } },
-    set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v) } catch (e) {} }
-  };
-  // Mantém a CHAVE existente no servidor, mas elimina a cópia persistente legada.
-  ls.set(KEY, null);
+  // Apaga a senha que versões antigas guardavam no navegador.
+  try { localStorage.removeItem("cat-chave") } catch (e) {}
 
   window.GHDB = async function () {
     const C = window.CATALOGO_CONFIG || {};
@@ -63,14 +56,11 @@
     }
 
     async function write(op, col, id, data) {
-      let chave = sessionKey;
-      if (!chave) { chave = window.prompt("Senha do painel (para salvar notas e comentários):") || ""; if (!chave) throw { code: "chave" } }
       // text/plain evita o "preflight" de CORS, que o Apps Script não responde
       const r = await fetch(C.apiUrl, { method: "POST", signal: AbortSignal.timeout(25000), headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ op, col, id, data, chave }) });
+        body: JSON.stringify({ op, col, id, data }) });
       const j = await r.json().catch(() => ({ ok: false, erro: "resposta inválida" }));
-      if (!j.ok) { if (j.erro === "chave") { sessionKey=null; throw { code: "chave" } } throw new Error(j.erro || "falha") }
-      sessionKey = chave;
+      if (!j.ok) throw new Error(j.erro || "falha");
       pull().catch(() => {});
     }
 

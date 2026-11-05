@@ -11,10 +11,11 @@ function app(t){
  let rows=[row('A'),row('B',450000)],fail=false;const polls=[],opened=[];
  w.open=()=>{const popup={opener:'original',closed:false,url:null,location:{replace:url=>popup.url=url},close:()=>popup.closed=true};opened.push(popup);return popup;};
  w.setInterval=fn=>{polls.push(fn);return polls.length;};
- w.fetch=async url=>{if(String(url).includes('/export?')){if(fail)throw Error('Sem conexão');return {ok:true,text:async()=>csv(rows)};}return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})};};
+ const posts=[];w.prompt=()=>{throw Error('senha pedida');};
+ w.fetch=async(url,options={})=>{if(options.method==='POST'){posts.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true})};}if(String(url).includes('/export?')){if(fail)throw Error('Sem conexão');return {ok:true,text:async()=>csv(rows)};}return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})};};
  for(const f of ['config.js','sheets.js','ghdb.js','catalogo.js','decision.js'])vm.runInContext(fs.readFileSync(__dirname+'/../site/'+f,'utf8'),dom.getInternalVMContext());
  const input=(id,value)=>{const e=d.querySelector(id);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
- return {w,d,polls,opened,input,eval:s=>vm.runInContext(s,dom.getInternalVMContext()),refresh:()=>d.querySelector('#syncbtn').click(),setRows:v=>rows=v,setFailure:v=>fail=v};
+ return {w,d,polls,posts,opened,input,eval:s=>vm.runInContext(s,dom.getInternalVMContext()),refresh:()=>d.querySelector('#syncbtn').click(),setRows:v=>rows=v,setFailure:v=>fail=v};
 }
 test('filtro de preço exclui desconhecidos quando há faixa e aceita valores além dos antigos limites',async t=>{
  const a=app(t);a.setRows([row('A',''),row('B',900000),row('C',50000)]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===3);
@@ -65,4 +66,7 @@ test('axe: catálogo, detalhes, comparação sem violações automatizáveis em 
  const audit=async()=>{const result=await a.w.axe.run(a.d.body,{rules:{'color-contrast':{enabled:false},region:{enabled:false}}});assert.equal(result.violations.length,0,JSON.stringify(result.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))));};
  await audit();a.d.querySelector('[data-detail="A"]').click();await audit();a.d.querySelector('#dialog-close').click();
  a.d.querySelector('[data-compare="A"]').click();a.d.querySelector('[data-compare="B"]').click();a.d.querySelector('#open-compare').click();await audit();a.d.querySelector('#dialog-close').click();
+});
+test('nota é salva sem pedir senha do painel',async t=>{
+ const a=app(t);await until(()=>a.d.querySelector('.stars button:not([disabled])'));a.d.querySelector('.stars button[data-v="4"]').click();await until(()=>a.posts.length);assert.equal(a.posts[0].op,'set');assert.equal(a.posts[0].data.estrelas,4);assert.equal('chave' in a.posts[0],false);
 });

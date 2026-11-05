@@ -5,12 +5,11 @@
  * da planilha: "notas", "comentarios" e "descartes" (criadas sozinhas).
  *
  *   GET  .../exec?op=all   -> {notas:[...], comentarios:[...], descartes:[...]}   (leitura aberta)
- *   POST .../exec          {op:"set"|"delete", col, id, data, chave}             (pede a senha)
+ *   POST .../exec          {op:"set"|"delete", col, id, data}                    (gravação aberta)
  *
  * Instalação: docs/PLANILHA_GOOGLE.md
  *  1. Planilha > Extensões > Apps Script > cole este arquivo.
- *  2. Configurações do projeto > Propriedades do script > CHAVE = <senha do painel>.
- *  3. Implantar > Nova implantação > App da Web
+ *  2. Implantar > Nova implantação > App da Web
  *     (Executar como: Eu · Quem pode acessar: Qualquer pessoa) e copie a URL /exec
  *     para site/config.js.
  */
@@ -61,8 +60,6 @@ function doGet(e) {
 function doPost(e) {
   let b;
   try { b = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, erro: 'json' }); }
-  const chave = PropertiesService.getScriptProperties().getProperty('CHAVE');
-  if (!chave || b.chave !== chave) return json_({ ok: false, erro: 'chave' });
   if (!ABAS[b.col]) return json_({ ok: false, erro: 'coleção' });
   const id = String(b.id || '').slice(0, 200);
   if (!id) return json_({ ok: false, erro: 'id' });

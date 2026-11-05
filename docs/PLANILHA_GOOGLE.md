@@ -12,11 +12,11 @@ Use o Sheets ou uma conexão autorizada de edição. ChatGPT/Claude alteram cél
 
 ## Avaliações
 
-O Apps Script configurado continua lendo/gravando notas, comentarios e descartes. A migração da listagem não exige mudar sua implantação. CHAVE, nas propriedades do script, é a senha do painel e nunca deve ser publicada.
+O Apps Script configurado continua lendo/gravando notas, comentarios e descartes. A migração da listagem não exige mudar sua implantação.
 
-apps_script/Code.gs contém uma versão compatível sem rotinas de importação que sobrescrevem dados. A instalação antiga pode ainda ter o menu **Importar tudo do GitHub**: não o use. Para substituir esse código antigo, abra Extensões → Apps Script, atualize o código e publique uma nova versão na implantação existente, preservando URL e CHAVE. Isso é manutenção do backend, não uma etapa para atualizar imóveis.
+apps_script/Code.gs contém uma versão compatível sem rotinas de importação que sobrescrevem dados. A instalação antiga pode ainda ter o menu **Importar tudo do GitHub**: não o use. Para substituir esse código antigo, abra Extensões → Apps Script, atualize o código e publique uma nova versão na implantação existente, preservando a URL. Isso é manutenção do backend, não uma etapa para atualizar imóveis.
 
-Em instalação nova: cole Code.gs no script vinculado à planilha, configure CHAVE e implante como app da Web (executar como proprietário, acesso público de leitura). A implementação valida a senha antes de gravar avaliações. Configure a URL /exec em site/config.js.
+Em instalação nova: cole Code.gs no script vinculado à planilha e implante como app da Web (executar como proprietário, acesso: qualquer pessoa). Não há senha: quem tiver a URL da API pode gravar avaliações. Configure a URL /exec em site/config.js.
 
 ## Migração
 

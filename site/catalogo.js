@@ -118,7 +118,7 @@ async function initDB(){
   DB.collection("descartes").onSnapshot(s=>{const ch=new Set();s.docChanges().forEach(c=>{const v=c.doc.data()||{};if(c.type==="removed")delete DESC[c.doc.id];else DESC[c.doc.id]=v;ch.add(c.doc.id)});softRender([...ch],true)},e=>console.warn("descartes",e));
   DB.onStatus(state=>{const next=state.ready?"ready":"error";if(next!==DBSTATE){DBSTATE=next;softRender([],true)}});
 }
-function dbFail(e,el){const m=e&&e.code==="chave"?"Senha do painel incorreta. Tente de novo; ela é pedida outra vez.":e&&e.code==="invalid_argument"?"Você não tem permissão para salvar aqui. Peça para a Natalie te dar acesso de Contribuidora.":"Não deu para salvar agora. Tente de novo em alguns segundos.";if(el){let n=el.querySelector(".avalnote.err");if(!n){n=document.createElement("span");n.className="avalnote err";el.appendChild(n)}n.textContent=m}}
+function dbFail(e,el){const m=e&&e.code==="invalid_argument"?"Você não tem permissão para salvar aqui. Peça para a Natalie te dar acesso de Contribuidora.":"Não deu para salvar agora. Tente de novo em alguns segundos.";if(el){let n=el.querySelector(".avalnote.err");if(!n){n=document.createElement("span");n.className="avalnote err";el.appendChild(n)}n.textContent=m}}
 document.addEventListener("click",async e=>{
   const st=e.target.closest(".stars button,.srow .clr");
   if(st&&DB){const {id,p,v}=st.dataset;const old=(NOTAS[id]||{})[p]||0;const nv=(+v===old)?0:+v;
