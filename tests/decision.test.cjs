@@ -70,3 +70,6 @@ test('axe: catálogo, detalhes, comparação sem violações automatizáveis em 
 test('nota é salva sem pedir senha do painel',async t=>{
  const a=app(t);await until(()=>a.d.querySelector('.stars button:not([disabled])'));a.d.querySelector('.stars button[data-v="4"]').click();await until(()=>a.posts.length);assert.equal(a.posts[0].op,'set');assert.equal(a.posts[0].data.estrelas,4);assert.equal('chave' in a.posts[0],false);
 });
+test('casa descartada some da lista e não há filtro para mostrá-la',async t=>{
+ const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("DESC={A:{pessoa:'natalie'}};S.showdisc=true;render()");assert.equal(a.d.querySelectorAll('.card').length,1);assert.equal(a.d.querySelector('.idtag').textContent,'B');assert.equal(a.d.querySelector('#showdisc'),null);
+});
