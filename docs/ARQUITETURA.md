@@ -28,13 +28,36 @@ Os campos são identificados pelo cabeçalho, permitindo reordenar colunas. Não
 | S | Longitude | Número decimal, opcional |
 | T | Distância UFG (km) | Número; calculado a partir de R/S se vazio |
 | U | Precisão da localização | bairro, CEP, endereço, aproximada etc. |
-| V | Cidade | Texto; padrão Goiânia |
+| V | Cidade | Texto; vazio = não informado |
 | W | Fotos | URL, URLs separadas por quebras de linha ou array JSON |
 | X | Fora do ar | Sim ou Não |
 | Y | Piscina | sim, cond, prev, não; vazio infere pelos comentários |
 | Z | Tipo de área | lote ou construída |
 
 Campos ausentes não viram zero. Números com formatação brasileira são aceitos. Links são restritos a HTTP(S) e textos são escapados antes da inserção no HTML. Distâncias são em linha reta até o Campus Samambaia da UFG.
+
+Área do lote (`lot`) e construída (`built`) são separadas no leitor. Se Z indica
+construída, E não é tratado como lote; a coluna opcional Área construída (m²)
+prevalece quando informada. Tipo de área explícito prevalece sobre inferências
+legadas dos comentários. Filtros e diferenças comparam somente a mesma natureza
+de área. Faixa de preço ativa exclui registros sem preço. Limites vazios não impõem
+cortes. As estatísticas dizem respeito aos resultados filtrados, e notas indisponíveis
+aparecem como desconhecidas.
+
+## Detalhes e comparação
+
+`catalogo.js` conserva os contratos globais existentes e o ciclo de atualização;
+`decision.js` acrescenta painéis nativos dialog e comparação por ID.
+Carregamento: config → sheets → ghdb → catalogo → decision. A seleção de comparação
+fica somente na memória da página. Rascunhos de comentário também ficam na sessão e
+são restaurados ao alterar filtros. Não há edição pelo site: correções são feitas
+na planilha.
+
+O botão Editar na planilha carrega uma nova leitura CSV e resolve o ID estável
+diretamente nas linhas recebidas. Exige cabeçalho único e exatamente uma ocorrência
+do ID, incluindo linhas que seriam ignoradas pela listagem por outros erros.
+Só então navega para a célula do ID. A posição em DATA e o link antigo do modal
+não são usados para determinar o destino. Não há escrita nem nova API nesse fluxo.
 
 ## Avaliações
 

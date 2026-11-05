@@ -8,15 +8,18 @@
  *   GET  <apiUrl>?op=all                  -> {notas:[...], comentarios:[...], descartes:[...]}
  *   POST <apiUrl>  {op, col, id, data, chave}   (op = set | delete)
  * As leituras são abertas; as gravações pedem a "senha do painel" (Script Property CHAVE),
- * guardada só no navegador de quem digitou.
+ * mantida somente na memória desta página após ser digitada.
  */
 (function () {
   const COLS = ["notas", "comentarios", "descartes"];
   const KEY = "cat-chave";
+  let sessionKey = null;
   const ls = {
     get: k => { try { return localStorage.getItem(k) } catch (e) { return null } },
     set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v) } catch (e) {} }
   };
+  // Mantém a CHAVE existente no servidor, mas elimina a cópia persistente legada.
+  ls.set(KEY, null);
 
   window.GHDB = async function () {
     const C = window.CATALOGO_CONFIG || {};
@@ -60,14 +63,14 @@
     }
 
     async function write(op, col, id, data) {
-      let chave = ls.get(KEY);
+      let chave = sessionKey;
       if (!chave) { chave = window.prompt("Senha do painel (para salvar notas e comentários):") || ""; if (!chave) throw { code: "chave" } }
       // text/plain evita o "preflight" de CORS, que o Apps Script não responde
       const r = await fetch(C.apiUrl, { method: "POST", signal: AbortSignal.timeout(25000), headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({ op, col, id, data, chave }) });
       const j = await r.json().catch(() => ({ ok: false, erro: "resposta inválida" }));
-      if (!j.ok) { if (j.erro === "chave") { ls.set(KEY, null); throw { code: "chave" } } throw new Error(j.erro || "falha") }
-      ls.set(KEY, chave);
+      if (!j.ok) { if (j.erro === "chave") { sessionKey=null; throw { code: "chave" } } throw new Error(j.erro || "falha") }
+      sessionKey = chave;
       pull().catch(() => {});
     }
 

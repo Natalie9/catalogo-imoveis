@@ -41,6 +41,8 @@
     return [...new Set(a.map(url).filter(Boolean))];
   }
   const yes = v => /^(sim|true|verdadeiro|1)(\b|$)/.test(norm(v));
+  const finance = v => /^(nao|não)\b/.test(norm(v)) ? 'nao' : /^sim\b/.test(norm(v)) ? 'sim' : 'incerto';
+  const positive = v => { const n=number(v);return n!=null&&n>=0?n:null; };
   const decimal = v => {
     const s = String(v ?? '').trim().replace(',', '.');
     return /^-?\d+(\.\d+)?$/.test(s) && Number.isFinite(+s) ? +s : null;
@@ -68,6 +70,17 @@
   }
   const HEADERS = ['Link original','Bairro','Rua / endereço aproximado','Preço (R$)','Área do lote (m²)','Quartos','Quintal','Financia?','Contato do vendedor','Imobiliária','Comentários','Status','ID do anúncio'];
   const EXTRA = ['Latitude','Longitude','Distância UFG (km)','Precisão da localização','Cidade','Fotos','Fora do ar','Piscina','Tipo de área'];
+  function locate(rows, id) {
+    if(typeof id!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,199}$/.test(id))throw new Error('ID do imóvel inválido.');
+    const headers=(rows[0]||[]).map(norm), key=norm('ID do anúncio');
+    if(headers.filter(h=>h===key).length!==1)throw new Error('Confira a coluna ID do anúncio: ela deve existir uma única vez.');
+    const column=headers.indexOf(key), matches=[];
+    rows.slice(1).forEach((row,i)=>{if(String(row[column]??'').trim()===id)matches.push(i+2);});
+    if(matches.length!==1)throw new Error(matches.length?'ID duplicado na planilha. A abertura foi bloqueada.':'Este ID não está mais na planilha. Atualize o catálogo.');
+    let letters='', index=column+1;
+    while(index){index--;letters=String.fromCharCode(65+index%26)+letters;index=Math.floor(index/26);}
+    return {row:matches[0],cell:letters+matches[0]};
+  }
   function houses(rows) {
     const headers = (rows[0] || []).map(norm);
     for (const h of HEADERS) if (!headers.includes(norm(h))) throw new Error('Coluna obrigatória ausente na planilha: ' + h);
@@ -91,11 +104,18 @@
       const q = String(at(v, 'Quartos')).match(/^\s*\d+/), nat = com.match(/Comentário da Natalie:\s*[“"]([^”"]+)[”"]/);
       const off = yes(at(v, 'Fora do ar'));
       out.push({r,id,u,s:new URL(u).hostname.replace(/^www\./,''),b:String(at(v,'Bairro')),rua:String(at(v,HEADERS[2])),
-        p:number(at(v,HEADERS[3])),l:number(at(v,HEADERS[4])),q:q?+q[0]:null,qt:String(at(v,'Quintal')),f:String(at(v,'Financia?')),
+        p:positive(at(v,HEADERS[3])),l:positive(at(v,HEADERS[4])),q:q?+q[0]:null,qt:String(at(v,'Quintal')),f:String(at(v,'Financia?')),
         c:String(at(v,'Contato do vendedor')),i:String(at(v,'Imobiliária')),com,st:String(at(v,'Status')||'Em avaliação'),
-        lat,lng,km,gp:String(at(v,'Precisão da localização')||'sem localização'),cid:String(at(v,'Cidade')||'Goiânia'),img:images(at(v,'Fotos')),
-        nat:nat?nat[1].trim():null,tags:tags(com,off,pk),novo:lat==null,pool:pk,lc:norm(at(v,'Tipo de área'))==='construida'||com.includes('Coluna E com a área'),
-        nn:number(at(v,'Nota Natalie (painel)')),nj:number(at(v,'Nota Jéssica (painel)')),pc:String(at(v,'Comentários do painel'))});
+        lat,lng,km:km!=null&&km>=0?km:null,gp:String(at(v,'Precisão da localização')||'sem localização'),cid:String(at(v,'Cidade')),img:images(at(v,'Fotos')),
+        nat:nat?nat[1].trim():null,tags:tags(com,off,pk),novo:lat==null,pool:pk,lc:norm(at(v,'Tipo de área'))?norm(at(v,'Tipo de área'))==='construida':com.includes('Coluna E com a área'),
+        nn:number(at(v,'Nota Natalie (painel)')),nj:number(at(v,'Nota Jéssica (painel)')),pc:String(at(v,'Comentários do painel')),
+        built:positive(at(v,'Área construída (m²)')),suites:positive(at(v,'Suítes')),baths:positive(at(v,'Banheiros')),
+        parking:positive(at(v,'Vagas de garagem')),condo:positive(at(v,'Condomínio (R$)')),iptu:positive(at(v,'IPTU (R$)')),
+        fin:String(at(v,'Situação do financiamento')),checked:String(at(v,'Data da conferência')),source:String(at(v,'Fonte da conferência')),
+        confirmed:String(at(v,'Informações confirmadas')),pending:String(at(v,'Pendências')),agio:String(at(v,'Informação sobre ágio')),
+        poolInfo:String(at(v,'Piscina'))});
+      const house=out[out.length-1];house.lot=house.lc?null:house.l;
+      if(house.built==null&&house.lc)house.built=house.l;
     });
     return {data:out,warnings};
   }
@@ -106,7 +126,7 @@
     if (!r.ok) throw new Error('Falha ao ler a planilha (HTTP ' + r.status + ').');
     return parseCSV(await r.text());
   }
-  const api = {parseCSV,number,url,images,pool,houses,read,HEADERS,EXTRA};
+  const api = {parseCSV,number,url,images,pool,finance,locate,houses,read,HEADERS,EXTRA};
   root.CatalogoSheets = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window === 'undefined' ? globalThis : window);
