@@ -53,6 +53,12 @@ fica somente na memória da página. Rascunhos de comentário também ficam na s
 são restaurados ao alterar filtros. Não há edição pelo site: correções são feitas
 na planilha.
 
+O botão Editar na planilha carrega uma nova leitura CSV e resolve o ID estável
+diretamente nas linhas recebidas. Exige cabeçalho único e exatamente uma ocorrência
+do ID, incluindo linhas que seriam ignoradas pela listagem por outros erros.
+Só então navega para a célula do ID. A posição em DATA e o link antigo do modal
+não são usados para determinar o destino. Não há escrita nem nova API nesse fluxo.
+
 ## Avaliações
 
 - notas: id, casa, pessoa, estrelas, quando. ID usual: ID-da-casa__pessoa.

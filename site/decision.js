@@ -1,7 +1,7 @@
 /* Detalhes e comparação. Usa os contratos de catálogo e avaliações existentes. */
 (() => {
   'use strict';
-  const missing='Não informado', selected=new Set();
+  const missing='Não informado', selected=new Set(), locating=new Set();
   let current=null, previousFocus=null;
   const el=document.createElement('div');
   el.innerHTML=`<div id="decision-message" role="status" aria-live="polite"></div>
@@ -29,7 +29,28 @@
   }
   $('#dialog-close').addEventListener('click',close);
   dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
-  function actions(d){return `<div class="card-actions"><a href="${esc(sheetRow(d))}" target="_blank" rel="noopener">Editar na planilha</a><button type="button" data-compare="${d.id}">Comparar</button><a href="${esc(d.u)}" target="_blank" rel="noopener">Abrir anúncio</a>${d.st==='Rejeitado'?'<span>Rejeitado na planilha: altere o Status na planilha para recuperar.</span>':`<button type="button" class="disc" data-id="${d.id}" ${DBSTATE!=='ready'?'disabled':''}>${DESC[d.id]?'Recuperar imóvel':'Descartar esta casa'}</button>`}</div>`;}
+  function actions(d){return `<div class="card-actions"><button type="button" data-sheet-edit="${d.id}">Editar na planilha</button><button type="button" data-compare="${d.id}">Comparar</button><a href="${esc(d.u)}" target="_blank" rel="noopener">Abrir anúncio</a>${d.st==='Rejeitado'?'<span>Rejeitado na planilha: altere o Status na planilha para recuperar.</span>':`<button type="button" class="disc" data-id="${d.id}" ${DBSTATE!=='ready'?'disabled':''}>${DESC[d.id]?'Recuperar imóvel':'Descartar esta casa'}</button>`}</div><p class="sheet-edit-status" role="status" aria-live="polite"></p>`;}
+  function editStatus(message){say(message);content.querySelectorAll('.sheet-edit-status').forEach(el=>el.textContent=message);}
+  function syncEditButtons(){document.querySelectorAll('[data-sheet-edit]').forEach(button=>{const busy=locating.has(button.dataset.sheetEdit);button.disabled=busy;button.textContent=busy?'Localizando imóvel…':'Editar na planilha';});}
+  async function editInSheet(id){
+    if(locating.has(id))return;
+    // Abrir durante o clique evita bloqueio de popup após a consulta assíncrona.
+    const popup=window.open('about:blank','_blank');
+    if(!popup){editStatus('Permita abrir uma nova guia e tente Editar na planilha novamente.');return;}
+    popup.opener=null;
+    locating.add(id);syncEditButtons();editStatus('Localizando o ID '+id+' na planilha…');
+    try{
+      const config=window.CATALOGO_CONFIG, rows=await CatalogoSheets.read(config,config.imoveisGid,AbortSignal.timeout(25000));
+      const found=CatalogoSheets.locate(rows,id);
+      if(popup.closed){editStatus('A guia foi fechada. Clique novamente para abrir a planilha.');return;}
+      const url='https://docs.google.com/spreadsheets/d/'+config.spreadsheetId+'/edit#gid='+config.imoveisGid+'&range='+found.cell;
+      popup.location.replace(url);
+      editStatus('Imóvel '+id+' localizado. Confira o ID destacado na planilha antes de editar.');
+    }catch(error){
+      if(!popup.closed)popup.close();
+      editStatus('Não foi possível abrir o imóvel: '+error.message);
+    }finally{locating.delete(id);syncEditButtons();}
+  }
   function detail(id){
     const d=DATA.find(d=>d.id===id);if(!d)return;
     open(d.b||'Detalhes do imóvel','detail',id);
@@ -71,6 +92,7 @@
   }
   document.addEventListener('click',e=>{
     const d=e.target.closest('[data-detail]'),c=e.target.closest('[data-compare]');
+    const edit=e.target.closest('[data-sheet-edit]');if(edit)editInSheet(edit.dataset.sheetEdit);
     if(d)detail(d.dataset.detail);
     if(c){const id=c.dataset.compare;if(selected.has(id))selected.delete(id);else if(selected.size<4)selected.add(id);else{say('Compare no máximo quatro casas. Remova uma para incluir outra.');return;}syncCompare();if(current?.mode==='compare')paintComparison();}
   });
@@ -82,7 +104,7 @@
       for(const key of [min,max]){const input=$('#'+key),bad=input.value.trim()!==''&&(CatalogoSheets.number(input.value)==null||CatalogoSheets.number(input.value)<0);input.setAttribute('aria-invalid',String(bad));if(bad)errors.push('Informe '+label+' válido e não negativo.');}
     }$('#filter-error').textContent=errors.join(' ');
   }
-  window.addEventListener('catalogrender',()=>{filterStatus();syncCompare();if(current?.mode==='compare')paintComparison();});
+  window.addEventListener('catalogrender',()=>{filterStatus();syncCompare();syncEditButtons();if(current?.mode==='compare')paintComparison();});
   window.addEventListener('ratingschange',()=>{syncCompare();if(current?.mode==='compare')paintComparison();});
   let theme='auto';try{theme=localStorage.getItem('cat-theme')||'auto';}catch(_){}
   function applyTheme(){if(theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme;}

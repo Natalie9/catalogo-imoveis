@@ -70,6 +70,17 @@
   }
   const HEADERS = ['Link original','Bairro','Rua / endereço aproximado','Preço (R$)','Área do lote (m²)','Quartos','Quintal','Financia?','Contato do vendedor','Imobiliária','Comentários','Status','ID do anúncio'];
   const EXTRA = ['Latitude','Longitude','Distância UFG (km)','Precisão da localização','Cidade','Fotos','Fora do ar','Piscina','Tipo de área'];
+  function locate(rows, id) {
+    if(typeof id!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,199}$/.test(id))throw new Error('ID do imóvel inválido.');
+    const headers=(rows[0]||[]).map(norm), key=norm('ID do anúncio');
+    if(headers.filter(h=>h===key).length!==1)throw new Error('Confira a coluna ID do anúncio: ela deve existir uma única vez.');
+    const column=headers.indexOf(key), matches=[];
+    rows.slice(1).forEach((row,i)=>{if(String(row[column]??'').trim()===id)matches.push(i+2);});
+    if(matches.length!==1)throw new Error(matches.length?'ID duplicado na planilha. A abertura foi bloqueada.':'Este ID não está mais na planilha. Atualize o catálogo.');
+    let letters='', index=column+1;
+    while(index){index--;letters=String.fromCharCode(65+index%26)+letters;index=Math.floor(index/26);}
+    return {row:matches[0],cell:letters+matches[0]};
+  }
   function houses(rows) {
     const headers = (rows[0] || []).map(norm);
     for (const h of HEADERS) if (!headers.includes(norm(h))) throw new Error('Coluna obrigatória ausente na planilha: ' + h);
@@ -115,7 +126,7 @@
     if (!r.ok) throw new Error('Falha ao ler a planilha (HTTP ' + r.status + ').');
     return parseCSV(await r.text());
   }
-  const api = {parseCSV,number,url,images,pool,finance,houses,read,HEADERS,EXTRA};
+  const api = {parseCSV,number,url,images,pool,finance,locate,houses,read,HEADERS,EXTRA};
   root.CatalogoSheets = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof window === 'undefined' ? globalThis : window);

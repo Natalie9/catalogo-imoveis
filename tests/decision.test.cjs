@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const {JSDOM}=require('jsdom'),{HEADERS,EXTRA}=require('../site/sheets.js');
+const {JSDOM}=require('jsdom'),{HEADERS,EXTRA,locate}=require('../site/sheets.js');
 const headers=[...HEADERS,'N','O','P','Q',...EXTRA];
 const row=(id,p=420000)=>['https://example.com/'+id,'Bairro '+id,'Rua',p,250,3,'Sim','Sim','Contato','Imob','Observações','Em avaliação',id,'','','','',-16.6,-49.3,5,'bairro','Goiânia','','Não','não','lote'];
 const csv=rows=>[headers,...rows].map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');
@@ -8,12 +8,13 @@ function app(t){
  const dom=new JSDOM(fs.readFileSync(__dirname+'/../site/index.html','utf8'),{url:'https://example.com',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window,d=w.document;t.after(()=>w.close());
  w.CSS={escape:s=>s};w.AbortSignal=AbortSignal;w.confirm=()=>true;w.console.warn=()=>{};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
- let rows=[row('A'),row('B',450000)];const polls=[];
+ let rows=[row('A'),row('B',450000)],fail=false;const polls=[],opened=[];
+ w.open=()=>{const popup={opener:'original',closed:false,url:null,location:{replace:url=>popup.url=url},close:()=>popup.closed=true};opened.push(popup);return popup;};
  w.setInterval=fn=>{polls.push(fn);return polls.length;};
- w.fetch=async url=>String(url).includes('/export?')?{ok:true,text:async()=>csv(rows)}:{ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})};
+ w.fetch=async url=>{if(String(url).includes('/export?')){if(fail)throw Error('Sem conexão');return {ok:true,text:async()=>csv(rows)};}return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})};};
  for(const f of ['config.js','sheets.js','ghdb.js','catalogo.js','decision.js'])vm.runInContext(fs.readFileSync(__dirname+'/../site/'+f,'utf8'),dom.getInternalVMContext());
  const input=(id,value)=>{const e=d.querySelector(id);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
- return {w,d,polls,input,eval:s=>vm.runInContext(s,dom.getInternalVMContext()),refresh:()=>d.querySelector('#syncbtn').click(),setRows:v=>rows=v};
+ return {w,d,polls,opened,input,eval:s=>vm.runInContext(s,dom.getInternalVMContext()),refresh:()=>d.querySelector('#syncbtn').click(),setRows:v=>rows=v,setFailure:v=>fail=v};
 }
 test('filtro de preço exclui desconhecidos quando há faixa e aceita valores além dos antigos limites',async t=>{
  const a=app(t);a.setRows([row('A',''),row('B',900000),row('C',50000)]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===3);
@@ -35,8 +36,26 @@ test('comparação permite 2–4 sem duplicar, calcula diferenças e atualiza ap
  a.d.querySelector('#open-compare').click();assert.equal(a.d.querySelectorAll('.comparison thead th').length,5);assert.match(a.d.querySelector('.comparison').textContent,/\+10.000 reais \(\+2,5%\)/);
  a.setRows([row('A',500000),row('B',600000)]);a.refresh();await until(()=>a.d.querySelectorAll('.comparison thead th').length===3);assert.match(a.d.querySelector('.comparison').textContent,/\+100.000 reais \(\+20%\)/);
 });
-test('editar abre a linha da casa na planilha, sem formulário no site',async t=>{
- const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);const link=[...a.d.querySelectorAll('.card a')].find(x=>x.textContent==='Editar na planilha');assert.match(link.href,/gid=2136363186&range=A2$/);assert.equal(a.d.querySelector('[data-edit]'),null);
+test('editar localiza o ID após reordenação, inclusive com detalhes antigos abertos',async t=>{
+ const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.d.querySelector('[data-detail="A"]').click();a.setRows([row('B'),row('A')]);
+ a.d.querySelector('#dialog-content [data-sheet-edit="A"]').click();await until(()=>a.opened[0]?.url);
+ assert.match(a.opened[0].url,/gid=2136363186&range=M3$/);assert.equal(a.opened[0].opener,null);assert.equal(a.d.querySelector('[data-edit]'),null);assert.equal(a.eval('DATA.find(d=>d.id==="A").r'),2);
+});
+test('ID ausente ou duplicado bloqueia a abertura, mesmo se a linha duplicada for inválida',async t=>{
+ for(const duplicate of [false,true]){const a=app(t);await until(()=>a.d.querySelector('[data-sheet-edit="A"]'));const invalid=row('A');invalid[0]='';a.setRows(duplicate?[row('A'),invalid]:[row('B')]);a.d.querySelector('[data-sheet-edit="A"]').click();await until(()=>a.opened[0]?.closed);assert.equal(a.opened[0].url,null);assert.match(a.d.querySelector('#decision-message').textContent,duplicate?/ID duplicado/:/não está mais/);}
+});
+test('falha de consulta não usa a linha antiga e permite tentar novamente',async t=>{
+ const a=app(t);await until(()=>a.d.querySelector('[data-sheet-edit="A"]'));a.setFailure(true);a.d.querySelector('[data-sheet-edit="A"]').click();await until(()=>a.opened[0]?.closed);assert.equal(a.opened[0].url,null);assert.equal(a.d.querySelector('[data-sheet-edit="A"]').disabled,false);
+ a.setFailure(false);a.setRows([row('B'),row('A')]);a.d.querySelector('[data-sheet-edit="A"]').click();await until(()=>a.opened[1]?.url);assert.match(a.opened[1].url,/range=M3$/);
+});
+test('nova guia bloqueada tem feedback e cliques simultâneos não abrem guias duplicadas',async t=>{
+ const a=app(t);await until(()=>a.d.querySelector('[data-sheet-edit="A"]'));const open=a.w.open;a.w.open=()=>null;a.d.querySelector('[data-sheet-edit="A"]').click();assert.match(a.d.querySelector('#decision-message').textContent,/Permita abrir/);a.w.open=open;
+ const button=a.d.querySelector('[data-sheet-edit="A"]');button.dispatchEvent(new a.w.MouseEvent('click',{bubbles:true}));button.dispatchEvent(new a.w.MouseEvent('click',{bubbles:true}));await until(()=>a.opened[0]?.url);assert.equal(a.opened.length,1);
+});
+test('localização encontra a coluna por cabeçalho e rejeita cabeçalhos ambíguos',()=>{
+ assert.deepEqual(locate([['Bairro','ID do anúncio'],['X','A']],'A'),{row:2,cell:'B2'});
+ assert.deepEqual(locate([[...Array(27).fill(''),'ID do anúncio'],[...Array(27).fill(''),'A']],'A'),{row:2,cell:'AB2'});
+ assert.throws(()=>locate([['ID do anúncio','ID do anúncio'],['A','A']],'A'),/única vez/);assert.throws(()=>locate([['Bairro'],['A']],'A'),/única vez/);
 });
 test('rascunho de comentário sobrevive a filtros e não é atribuído a outra autora',async t=>{
  const a=app(t);await until(()=>a.d.querySelector('.cform'));const ta=a.d.querySelector('.cform[data-id="A"] textarea');ta.value='Rascunho de visita';ta.dispatchEvent(new a.w.Event('input',{bubbles:true}));a.input('#q','Bairro B');a.input('#q','');assert.equal(a.d.querySelector('.cform[data-id="A"] textarea').value,'Rascunho de visita');

@@ -11,7 +11,6 @@ function pcol(p){if(p==null)return "var(--off)";return p<PB[0]?"var(--p1)":p<PB[
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
 function pcolHex(p){const m={"var(--p1)":"--p1","var(--p2)":"--p2","var(--p3)":"--p3","var(--p4)":"--p4","var(--off)":"--off"};return cssVar(m[pcol(p)])}
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const sheetRow=d=>"https://docs.google.com/spreadsheets/d/"+window.CATALOGO_CONFIG.spreadsheetId+"/edit#gid="+window.CATALOGO_CONFIG.imoveisGid+"&range=A"+d.r;
 const isAlert=d=>d.tags.some(t=>t[0]==="bad");
 
 /* ---------- estado e filtros ---------- */
@@ -185,7 +184,7 @@ function card(d){
     ${chips.length?`<div class="chips">${chips.join("")}</div>`:""}
     
     <div class="aval" data-id="${d.id}">${avalHTML(d)}</div>
-    <div class="card-actions"><button type="button" data-detail="${d.id}">Ver detalhes</button><a href="${esc(sheetRow(d))}" target="_blank" rel="noopener">Editar na planilha</a><button type="button" data-compare="${d.id}" aria-pressed="false">Comparar</button></div>
+    <div class="card-actions"><button type="button" data-detail="${d.id}">Ver detalhes</button><button type="button" data-sheet-edit="${d.id}">Editar na planilha</button><button type="button" data-compare="${d.id}" aria-pressed="false">Comparar</button></div>
     <div class="foot"><a class="go" href="${esc(d.u)}" target="_blank" rel="noopener">Abrir anúncio</a><span class="src">${esc(d.s)} · <span class="idtag">${esc(d.id)}</span></span></div>
     ${d.st!=="Rejeitado"?`<div class="foot"><button type="button" class="disc" data-id="${d.id}">${DESC[d.id]?"Voltar para a lista":"Descartar esta casa"}</button>${DESC[d.id]?`<span class="avalnote">descartada por ${esc(NOMES[DESC[d.id].pessoa]||"alguém")} em ${dataBR(DESC[d.id].quando)}</span>`:""}</div>`:""}
   </div></article>`;

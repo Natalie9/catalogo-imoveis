@@ -32,7 +32,11 @@ Não há Excel, CSV ou JSON de imóveis no repositório. O CSV online é process
 
 A interface tem filtros principais/avançados, detalhes de cada casa e comparação
 de duas a quatro casas. Correções de dados são feitas direto na planilha: o botão
-**Editar na planilha** abre a linha da casa.
+**Editar na planilha** consulta novamente a planilha e localiza o **ID do anúncio**
+no momento do clique, mesmo com os detalhes abertos antes de uma reordenação.
+IDs ausentes/duplicados e falhas de consulta bloqueiam a abertura; não se usa a
+linha antiga como alternativa. A célula do ID é destacada para conferência antes
+de editar. A exportação do Google pode atrasar: confira sempre o ID destacado.
 
 - site/index.html: estrutura estática, sem catálogo embutido.
 - site/catalogo.css e site/decision.css: estilos, temas e responsividade.
