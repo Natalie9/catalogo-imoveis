@@ -108,7 +108,12 @@
   window.addEventListener('ratingschange',()=>{syncCompare();if(current?.mode==='compare')paintComparison();});
   let theme='auto';try{theme=localStorage.getItem('cat-theme')||'auto';}catch(_){}
   function applyTheme(){if(theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=theme;}
-  $('#theme').value=theme;applyTheme();$('#theme').addEventListener('change',e=>{theme=e.target.value;applyTheme();try{localStorage.setItem('cat-theme',theme);}catch(_){}});
+  const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)');
+  const isDark=()=>theme==='dark'||(theme==='auto'&&!!(mq&&mq.matches));
+  function paintTheme(){const b=$('#theme'),dk=isDark();b.dataset.mode=dk?'dark':'light';b.setAttribute('aria-pressed',String(dk));b.title=dk?'Mudar para tema claro':'Mudar para tema escuro';}
+  applyTheme();paintTheme();
+  if(mq&&mq.addEventListener)mq.addEventListener('change',paintTheme);
+  $('#theme').addEventListener('click',()=>{theme=isDark()?'light':'dark';applyTheme();paintTheme();try{localStorage.setItem('cat-theme',theme);}catch(_){}});
   // A preferência de autora torna explícito a quem o filtro “meu” se refere.
   const viewer=document.createElement('div');viewer.className='f';viewer.innerHTML='<label for="viewer">Meus comentários: identificar como</label><select id="viewer"><option value="natalie">Natalie</option><option value="jessica">Jéssica</option></select>';
   document.querySelector('#noalert').closest('.chk').before(viewer);$('#viewer').value=ME;
