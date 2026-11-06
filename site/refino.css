@@ -6,14 +6,14 @@
 /* ---------- cabeçalho ---------- */
 header.top{display:block;padding:8px 0 4px}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:4px}
-.topbar .eyebrow{margin:0}
-.theme{flex:none}
-.theme select{width:auto;min-height:36px;padding:4px 10px;font-size:.85rem;background:var(--surface)}
+.theme-btn{flex:none;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink);cursor:pointer}
+.theme-btn:hover{background:var(--campus-soft)}
+.theme-btn .i-sun{display:none}.theme-btn[data-mode="dark"] .i-sun{display:block}.theme-btn[data-mode="dark"] .i-moon{display:none}
 header.top h1{margin:0}
-header.top .lede{margin:.15rem 0 14px}
+header.top{padding-bottom:12px}
 
 /* ---------- KPIs ---------- */
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;background:none;border:0;padding:0;border-radius:0}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;background:none;border:0;padding:0;border-radius:0}
 .stats-scope{grid-column:1/-1;margin:0 0 -4px;font-size:.8rem;color:var(--muted)}
 .stat{display:flex;flex-direction:column;gap:4px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;border-left-width:4px}
 .stat-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
@@ -73,12 +73,12 @@ header.top .lede{margin:.15rem 0 14px}
 .badge{position:absolute;z-index:2;font-size:.72rem;font-weight:700;line-height:1;padding:5px 9px;border-radius:99px;background:rgba(14,20,15,.78);color:#fff;pointer-events:none;letter-spacing:.02em}
 .badge[hidden]{display:none}
 .badge.origin{left:8px;top:8px}
-.badge.avg{left:8px;bottom:8px;color:#ffd25f;pointer-events:auto}
+.badge.avg{left:8px;bottom:8px;color:#ffe74c;pointer-events:auto}
 .quick-disc{position:absolute;z-index:3;right:8px;top:8px;display:inline-flex;align-items:center;gap:6px;min-height:34px;min-width:34px;justify-content:center;padding:0 9px;border:0;border-radius:99px;background:rgba(14,20,15,.78);color:#fff;cursor:pointer;font:inherit;font-size:.78rem;font-weight:700}
 .quick-disc::after{content:"";position:absolute;inset:-5px}
 .quick-disc .t{display:none}
-.quick-disc:hover{background:#b2392a}
-.quick-disc.sure{background:#b2392a}.quick-disc.sure .t{display:inline}
+.quick-disc:hover{background:var(--bad)}
+.quick-disc.sure{background:var(--bad)}.quick-disc.sure .t{display:inline}
 .card .body{gap:10px;padding:14px 16px 14px}
 .card .price{font-size:1.5rem}
 .titlebox{display:flex;flex-direction:column;gap:1px;margin-top:-4px}
@@ -136,14 +136,12 @@ header.top .lede{margin:.15rem 0 14px}
 
 /* ---------- responsivo ---------- */
 @media(max-width:979px){
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .toolbar .count{width:100%;margin:0}
   .toolbar .f{flex:1 1 150px}
   .toolbar .f label{display:none}
   .toolbar .f select{width:100%}
 }
 @media(max-width:650px){
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .stat{padding:10px 12px}.stat b{font-size:1.35rem}
   .syncbar a{margin-left:0}
 }
@@ -152,3 +150,16 @@ header.top .lede{margin:.15rem 0 14px}
 .drawer .cform select,.drawer .cform button{width:100%;min-height:44px;font-size:.9rem}
 .syncbar #syncmsg{flex:1 1 0;min-width:0}
 @media(min-width:651px){.syncbar #syncmsg{flex:0 1 auto}}
+
+/* ---------- coluna lateral: filtros + indicadores ---------- */
+.side-col{position:sticky;top:12px;max-height:calc(100dvh - 24px);overflow-y:auto;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.side-col .sidebar{position:static;max-height:none;flex:none}
+@media(min-width:980px){.side-col .side-body{overflow:visible}}
+.side-col .stat{padding:10px 12px}.side-col .stat b{font-size:1.35rem}
+.quick-disc:hover,.quick-disc.sure{color:#fff}
+@media(max-width:979px){
+  .side-col{position:static;max-height:none;overflow:visible;margin-bottom:14px}
+  .side-col .sidebar{position:fixed}
+  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}

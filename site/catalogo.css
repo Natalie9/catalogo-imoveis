@@ -1,24 +1,24 @@
 
 /* Identidade original e componentes do catálogo. */
 :root{
-  --bg:#f2f4ee; --surface:#fbfcf8; --ink:#17201a; --muted:#5d685e; --line:#d9ded3;
-  --accent:#c98a0f; --accent-ink:#1d1606; --campus:#2f6a3c; --campus-soft:rgba(47,106,60,.10);
-  --bad:#b2392a; --bad-bg:#f8e3df; --warn:#8a5a00; --warn-bg:#f6ead0; --info:#2c5d86; --info-bg:#e1ecf5; --off:#6b6f6a; --off-bg:#e6e7e3;
-  --p1:#f0cf6b; --p2:#de9a2c; --p3:#b5562a; --p4:#6d2a12; --pin-stroke:#ffffff; --water:#e3e8de;
+  --bg:#f3f8fd; --surface:#ffffff; --ink:#14263a; --muted:#52697f; --line:#d3e0ec;
+  --accent:#38618c; --accent-ink:#ffffff; --campus:#38618c; --campus-soft:rgba(56,97,140,.10);
+  --bad:#c42738; --bad-bg:#ffe4e6; --warn:#6e5a00; --warn-bg:#fff4b3; --info:#1767ad; --info-bg:#dff0ff; --off:#5e6c78; --off-bg:#e6ecf1;
+  --p1:#ffe74c; --p2:#ff5964; --p3:#38618c; --p4:#17304a; --pin-stroke:#ffffff; --water:#dcebf7;
   --display:"Archivo",ui-sans-serif,system-ui,sans-serif;
   --body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
   --r:10px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111611; --surface:#192019; --ink:#e6ebe3; --muted:#9ba697; --line:#2d372d;
-  --accent:#f0b43a; --accent-ink:#1d1606; --campus:#7fbf8c; --campus-soft:rgba(127,191,140,.12);
-  --bad:#f08b7c; --bad-bg:#3a1f1b; --warn:#e9be62; --warn-bg:#352a14; --info:#8dbbe2; --info-bg:#1b2a38; --off:#a5aaa3; --off-bg:#262b26;
-  --p1:#f3d57a; --p2:#e6a23a; --p3:#d36f3d; --p4:#a8462a; --pin-stroke:#111611; --water:#151c15; color-scheme:dark}}
+  --bg:#0e1a27; --surface:#15263a; --ink:#e9f2fb; --muted:#9bb2c8; --line:#284560;
+  --accent:#35a7ff; --accent-ink:#06192a; --campus:#6cc0ff; --campus-soft:rgba(53,167,255,.14);
+  --bad:#ff8a93; --bad-bg:#3b1a20; --warn:#ffe74c; --warn-bg:#3a3410; --info:#7cc4ff; --info-bg:#12304a; --off:#a3b3c2; --off-bg:#1f3248;
+  --p1:#ffe74c; --p2:#ff5964; --p3:#35a7ff; --p4:#c9e6ff; --pin-stroke:#0e1a27; --water:#0b1520; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111611; --surface:#192019; --ink:#e6ebe3; --muted:#9ba697; --line:#2d372d;
-  --accent:#f0b43a; --accent-ink:#1d1606; --campus:#7fbf8c; --campus-soft:rgba(127,191,140,.12);
-  --bad:#f08b7c; --bad-bg:#3a1f1b; --warn:#e9be62; --warn-bg:#352a14; --info:#8dbbe2; --info-bg:#1b2a38; --off:#a5aaa3; --off-bg:#262b26;
-  --p1:#f3d57a; --p2:#e6a23a; --p3:#d36f3d; --p4:#a8462a; --pin-stroke:#111611; --water:#151c15; color-scheme:dark}
+  --bg:#0e1a27; --surface:#15263a; --ink:#e9f2fb; --muted:#9bb2c8; --line:#284560;
+  --accent:#35a7ff; --accent-ink:#06192a; --campus:#6cc0ff; --campus-soft:rgba(53,167,255,.14);
+  --bad:#ff8a93; --bad-bg:#3b1a20; --warn:#ffe74c; --warn-bg:#3a3410; --info:#7cc4ff; --info-bg:#12304a; --off:#a3b3c2; --off-bg:#1f3248;
+  --p1:#ffe74c; --p2:#ff5964; --p3:#35a7ff; --p4:#c9e6ff; --pin-stroke:#0e1a27; --water:#0b1520; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;margin:0}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;max-width:1500px;margin:0 auto}
@@ -83,8 +83,8 @@ main{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:16px}
 .chip.imob{background:var(--surface);color:var(--ink);border:1px solid var(--line);font-weight:600;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .chip.pool{background:#dcefff;color:#0b5c99;font-weight:700}
 .chip.poolp{background:transparent;color:#0b5c99;border:1px dashed #6fa8d6}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.pool{background:#14324a;color:#9fd2ff}:root:not([data-theme="light"]) .chip.poolp{color:#9fd2ff;border-color:#3d6f96}}
-:root[data-theme="dark"] .chip.pool{background:#14324a;color:#9fd2ff}:root[data-theme="dark"] .chip.poolp{color:#9fd2ff;border-color:#3d6f96}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip.pool{background:#12304a;color:#9fd2ff}:root:not([data-theme="light"]) .chip.poolp{color:#9fd2ff;border-color:#3d6f96}}
+:root[data-theme="dark"] .chip.pool{background:#12304a;color:#9fd2ff}:root[data-theme="dark"] .chip.poolp{color:#9fd2ff;border-color:#3d6f96}
 .chip.dist{background:var(--campus-soft);color:var(--campus);font-weight:700}
 .nat{font-size:.88rem;border-left:3px solid var(--accent);padding:2px 0 2px 9px;font-style:italic}
 details{font-size:.84rem;color:var(--muted)}
