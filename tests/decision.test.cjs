@@ -26,7 +26,7 @@ test('lote e área construída não se misturam no filtro',async t=>{
  const a=app(t),r=row('A');r[25]='construída';a.setRows([r,row('B')]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===2);a.input('#lmin','200');assert.equal(a.d.querySelector('.idtag').textContent,'B');a.d.querySelector('#area input[value=construida]').click();assert.equal(a.d.querySelector('.idtag').textContent,'A');
 });
 test('comentário meu respeita autora, filtros individuais e estatísticas reagem às notas',async t=>{
- const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("COMS={A:[{pessoa:'jessica',texto:'texto'}],B:[{pessoa:'natalie',texto:'texto'}]};NOTAS={A:{jessica:5},B:{natalie:4,jessica:3}};ME='natalie';S.onlynat=true;render()");assert.equal(a.d.querySelector('.idtag').textContent,'B');assert.match(a.d.querySelector('#stats').textContent,/1pelas duas/);a.eval("S.onlynat=false;S.natmin='sem';render()");assert.equal(a.d.querySelector('.idtag').textContent,'A');
+ const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("COMS={A:[{pessoa:'jessica',texto:'texto'}],B:[{pessoa:'natalie',texto:'texto'}]};NOTAS={A:{jessica:5},B:{natalie:4,jessica:3}};ME='natalie';S.onlynat=true;render()");assert.equal(a.d.querySelector('.idtag').textContent,'B');assert.equal(a.d.querySelector('.stat.info b').textContent,'1');a.eval("S.onlynat=false;S.natmin='sem';render()");assert.equal(a.d.querySelector('.idtag').textContent,'A');
 });
 test('detalhes escapam conteúdo inseguro e mantêm ausentes explícitos',async t=>{
  const a=app(t),r=row('A');r[10]='<img src=x onerror=alert(1)>';r[21]='';a.setRows([r]);a.refresh();await until(()=>a.d.querySelector('.card'));a.d.querySelector('[data-detail]').click();assert.equal(a.d.querySelector('#property-dialog').open,true);assert.match(a.d.querySelector('#dialog-content').textContent,/<img src=x/);assert.equal(a.d.querySelector('#dialog-content [onerror]'),null);assert.match(a.d.querySelector('#dialog-content').textContent,/Não informado/);a.d.querySelector('#dialog-close').click();assert.equal(a.d.querySelector('#property-dialog').open,false);
@@ -59,7 +59,7 @@ test('localização encontra a coluna por cabeçalho e rejeita cabeçalhos ambí
  assert.throws(()=>locate([['ID do anúncio','ID do anúncio'],['A','A']],'A'),/única vez/);assert.throws(()=>locate([['Bairro'],['A']],'A'),/única vez/);
 });
 test('rascunho de comentário sobrevive a filtros e não é atribuído a outra autora',async t=>{
- const a=app(t);await until(()=>a.d.querySelector('.cform'));const ta=a.d.querySelector('.cform[data-id="A"] textarea');ta.value='Rascunho de visita';ta.dispatchEvent(new a.w.Event('input',{bubbles:true}));a.input('#q','Bairro B');a.input('#q','');assert.equal(a.d.querySelector('.cform[data-id="A"] textarea').value,'Rascunho de visita');
+ const a=app(t);await until(()=>a.d.querySelector('[data-coms="A"]'));a.d.querySelector('[data-coms="A"]').click();await until(()=>a.d.querySelector('.cform'));const ta=a.d.querySelector('.cform[data-id="A"] textarea');ta.value='Rascunho de visita';ta.dispatchEvent(new a.w.Event('input',{bubbles:true}));a.input('#q','Bairro B');a.input('#q','');assert.equal(a.d.querySelector('.cform[data-id="A"] textarea').value,'Rascunho de visita');
 });
 test('axe: catálogo, detalhes, comparação sem violações automatizáveis em jsdom',async t=>{
  const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.w.HTMLCanvasElement.prototype.getContext=()=>null;a.w.eval(require('axe-core').source);
@@ -84,4 +84,33 @@ test('quartos funciona como controle segmentado e conta como filtro ativo',async
  a.d.querySelector('#qmin input[value="4"]').dispatchEvent(new a.w.Event('input',{bubbles:true}));
  a.d.querySelector('#qmin input[value="4"]').checked=true;a.d.querySelector('#qmin').dispatchEvent(new a.w.Event('input',{bubbles:true}));
  assert.equal(a.eval('S.qmin'),'4');assert.match(a.d.querySelector('#activefilters').textContent,/1/);
+});
+test('card: título sem anotação de conflito, origem, divergência em popover e ações',async t=>{
+ const a=app(t),r=row('OLX-9');r[1]='Residencial Brisas (texto diz Recanto do Bosque)';r[10]='DIVERGÊNCIA: o título diz 3 suítes.';a.setRows([r]);a.refresh();
+ await until(()=>a.d.querySelector('.idtag')?.textContent==='OLX-9');
+ const c=a.d.querySelector('.card');
+ assert.equal(c.querySelector('.bairro').textContent,'Residencial Brisas');
+ assert.equal(c.querySelector('.badge.origin').textContent,'OLX');
+ const tag=c.querySelector('.divtag');assert.match(tag.textContent,/Dados divergentes/);assert.match(c.querySelector('.pop').textContent,/Recanto do Bosque/);assert.match(c.querySelector('.pop').textContent,/3 suítes/);
+ tag.click();assert.equal(tag.getAttribute('aria-expanded'),'true');tag.click();assert.equal(tag.getAttribute('aria-expanded'),'false');
+ assert.equal(c.querySelectorAll('.card-actions .btn-primary').length,1);
+ assert.equal(c.querySelector('.btn-primary').textContent,'Ver detalhes');
+});
+test('comentários abrem numa gaveta, mostram a contagem e salvam sem senha',async t=>{
+ const a=app(t);await until(()=>a.d.querySelector('[data-coms="A"]'));
+ assert.equal(a.d.querySelector('.card .cform'),null);
+ a.d.querySelector('[data-coms="A"]').click();await until(()=>a.d.querySelector('#coms-body .cform'));
+ assert.ok(a.d.querySelector('#coms-drawer').open);
+ const ta=a.d.querySelector('#coms-body textarea');ta.value='Gostei do quintal';a.d.querySelector('#coms-body .cform').dispatchEvent(new a.w.Event('submit',{bubbles:true,cancelable:true}));
+ await until(()=>a.posts.some(p=>p.col==='comentarios'&&p.data?.texto==='Gostei do quintal'));
+ await until(()=>ta.value==='');
+});
+test('descarte rápido na foto pede confirmação antes de descartar',async t=>{
+ const a=app(t);await until(()=>a.d.querySelector('.quick-disc'));
+ const b=a.d.querySelector('.quick-disc');b.click();assert.ok(b.classList.contains('sure'));assert.equal(a.posts.filter(p=>p.col==='descartes').length,0);
+ b.click();await until(()=>a.posts.some(p=>p.col==='descartes'));
+});
+test('preço usa máscara em reais e filtra pelo valor numérico',async t=>{
+ const a=app(t);await until(()=>a.d.querySelectorAll('.card').length>1);
+ a.input('#pmin','800000');assert.equal(a.d.querySelector('#pmin').value,'800.000');assert.equal(a.eval('S.pmin'),800000);
 });

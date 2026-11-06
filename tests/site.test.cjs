@@ -11,6 +11,7 @@ function app(t){
  let rows=[row('TEST-1')],fail=false,apiFail=false;const polls=[];
  w.setInterval=fn=>{polls.push(fn);return polls.length};
  w.fetch=async u=>{if(String(u).includes('/export?')){if(fail)throw Error('Sem rede');return {ok:true,text:async()=>csv(rows)}}if(apiFail)throw Error('API indisponível');return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})}};
+ w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
  for(const f of ['config.js','sheets.js','ghdb.js'])w.eval(fs.readFileSync(path.join(root,f),'utf8'));
  for(const f of ['catalogo.js','decision.js'])require('node:vm').runInContext(fs.readFileSync(path.join(root,f),'utf8'),dom.getInternalVMContext());
  return {w,dom,polls,setRows:r=>rows=r,setFailure:v=>fail=v,setApiFailure:v=>apiFail=v,refresh:()=>w.document.querySelector('#syncbtn').click()};
@@ -26,7 +27,7 @@ test('falha de rede preserva a leitura anterior e permite tentar novamente',asyn
  a.setFailure(false);a.setRows([row('TEST-2')]);a.refresh();await until(()=>d.querySelector('.idtag')?.textContent==='TEST-2');assert.ok(!d.querySelector('#syncmsg').classList.contains('err'));
 });
 test('atualizações não apagam comentário em edição e conservam filtros',async t=>{
- const a=app(t),d=a.w.document;await until(()=>d.querySelector('.cform textarea'));
+ const a=app(t),d=a.w.document;await until(()=>d.querySelector('[data-coms]'));d.querySelector('[data-coms]').click();await until(()=>d.querySelector('.cform textarea'));
  const textarea=d.querySelector('textarea');textarea.value='rascunho';textarea.focus();
  a.setRows([row('TEST-1',390000)]);a.refresh();await until(()=>d.querySelector('#syncmsg').textContent.includes('Termine seu comentário'));assert.equal(d.querySelector('textarea').value,'rascunho');
  textarea.value='';textarea.blur();await until(()=>d.querySelector('.price').textContent.includes('390.000'));
@@ -36,7 +37,7 @@ test('avaliações se recuperam de falha inicial sem impedir os imóveis',async 
  const a=app(t),d=a.w.document;a.setApiFailure(true);
  // A consulta inicial já pode estar em andamento; força um ciclo com falha.
  await until(()=>a.polls.length);a.polls[0]();await until(()=>d.querySelector('.avalnote')?.textContent.includes('indisponíveis'));
- assert.equal(d.querySelectorAll('.card').length,1);a.setApiFailure(false);a.polls[0]();await until(()=>d.querySelector('.cform'));
+ assert.equal(d.querySelectorAll('.card').length,1);a.setApiFailure(false);a.polls[0]();await until(()=>!d.querySelector('.avalnote'));
 });
 test('páginas não enviam Referer (o OLX bloqueia fotos pedidas a partir do site)',()=>{
   assert.match(fs.readFileSync(path.join(__dirname,'../site/index.html'),'utf8'),/<meta name="referrer" content="no-referrer">/);
