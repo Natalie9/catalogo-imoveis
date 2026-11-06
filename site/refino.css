@@ -154,7 +154,7 @@ header.top{padding-bottom:12px}
 /* ---------- coluna lateral: filtros + indicadores ---------- */
 .side-col{position:sticky;top:12px;max-height:calc(100dvh - 24px);overflow-y:auto;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 .side-col .sidebar{position:static;max-height:none;flex:none}
-.side-col .side-body{overflow:visible}
+@media(min-width:980px){.side-col .side-body{overflow:visible}}
 .side-col .stat{padding:10px 12px}.side-col .stat b{font-size:1.35rem}
 .quick-disc:hover,.quick-disc.sure{color:#fff}
 @media(max-width:979px){
