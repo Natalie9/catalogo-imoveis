@@ -69,7 +69,7 @@
     return t;
   }
   const HEADERS = ['Link original','Bairro','Rua / endereço aproximado','Preço (R$)','Área do lote (m²)','Quartos','Quintal','Financia?','Contato do vendedor','Imobiliária','Comentários','Status','ID do anúncio'];
-  const EXTRA = ['Latitude','Longitude','Distância UFG (km)','Precisão da localização','Cidade','Fotos','Fora do ar','Piscina','Tipo de área'];
+  const EXTRA = ['Latitude','Longitude','Distância UFG (km)','Precisão da localização','Cidade','Fotos','Fora do ar','Piscina','Tipo de área','Data do anúncio','Data de inclusão na planilha'];
   function locate(rows, id) {
     if(typeof id!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,199}$/.test(id))throw new Error('ID do imóvel inválido.');
     const headers=(rows[0]||[]).map(norm), key=norm('ID do anúncio');
@@ -113,6 +113,7 @@
         parking:positive(at(v,'Vagas de garagem')),condo:positive(at(v,'Condomínio (R$)')),iptu:positive(at(v,'IPTU (R$)')),
         fin:String(at(v,'Situação do financiamento')),checked:String(at(v,'Data da conferência')),source:String(at(v,'Fonte da conferência')),
         confirmed:String(at(v,'Informações confirmadas')),pending:String(at(v,'Pendências')),agio:String(at(v,'Informação sobre ágio')),
+        postedAt:String(at(v,'Data do anúncio')),addedAt:String(at(v,'Data de inclusão na planilha')),
         poolInfo:String(at(v,'Piscina'))});
       const house=out[out.length-1];house.lot=house.lc?null:house.l;
       if(house.built==null&&house.lc)house.built=house.l;

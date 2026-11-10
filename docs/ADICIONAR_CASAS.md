@@ -7,7 +7,7 @@
 1. **Verifique se já existe.** Procure primeiro pelo ID e pela URL do anúncio. Se não encontrar, compare endereço/bairro, preço, descrição, fotos e telefone/imobiliária. Anúncios de portais diferentes podem ser a mesma oferta: confirme antes de criar uma nova linha. Não una anúncios distintos só porque parecem ser do mesmo imóvel.
 2. **Crie uma linha na aba Imóveis**, mantendo a ordem dos cabeçalhos e as validações. Preencha o que o anúncio ou uma fonte confiável confirma; deixe o restante vazio. Nunca use zero para representar dado desconhecido.
 3. **Gere o ID estável em M** conforme o padrão da fonte (tabela abaixo). Confirme que ele não existe. O ID identifica a oferta no catálogo e liga o imóvel às notas, comentários e descartes.
-4. **Preencha as colunas de resumo A–M** e os campos complementares R–AD conforme as regras abaixo. Use números nas colunas numéricas e mantenha URLs completas.
+4. **Preencha as colunas de resumo A–M** e os campos complementares R–AF conforme as regras abaixo. Use números nas colunas numéricas e mantenha URLs completas.
 5. **Copie as fórmulas de N–Q da linha anterior** para a nova linha, ajustando-as para o ID da nova linha. Confira que continuaram como fórmulas e que os resumos apontam para o ID correto.
 6. **Confira a publicação:** reabra a planilha e o site, atualize a listagem pelo botão **Atualizar agora** (ou aguarde a atualização periódica) e confirme que o anúncio, as fotos e os campos exibidos estão corretos.
 
@@ -28,6 +28,9 @@
 - **X — anúncio fora do ar:** `Sim` ou `Não` conforme o estado observado; use AD se não foi possível verificar.
 - **Y — piscina:** `sim` (na casa), `cond` (no condomínio), `prev` (prevista/em construção) ou `não`. Não presuma que uma piscina do condomínio pertence ao imóvel.
 - **AC — financiamento detalhado** e **AD — pendências:** preserve as condições específicas e os pontos ainda não confirmados. Informação ausente fica em branco.
+- **AE — Data do anúncio:** registre a data de publicação informada no portal, quando disponível. Se a página mostrar apenas um período relativo como “há 3 dias”, confirme a data antes de converter; não invente uma data.
+- **AF — Data de inclusão na planilha:** registre a data em que a linha foi criada na aba **Imóveis**, não a data em que foi revisada. Nas linhas antigas sem histórico confiável, deixe vazio.
+- As duas colunas usam formato de data `dd/mm/aaaa`. O site mostra **Não informado** quando a célula está vazia.
 
 ## IDs e integridade do histórico
 
@@ -52,4 +55,4 @@ Para deixar de considerar um imóvel, use **Status = Rejeitado** ou o fluxo de d
 
 ## Atualização por ChatGPT ou automação
 
-O pedido deve incluir o link do anúncio e a ação desejada (inserir, atualizar ou retirar da seleção). O assistente deve procurar ID/URL e possíveis duplicatas, extrair apenas dados comprováveis, registrar lacunas sem inventá-las, editar a linha apropriada na planilha e reler a linha para validar o resultado. O acesso ao repositório GitHub, por si só, não autoriza a edição da planilha. Não incluir tokens ou credenciais em células, código ou instruções.
+O pedido deve incluir o link do anúncio e a ação desejada (inserir, atualizar ou retirar da seleção). O assistente deve procurar ID/URL e possíveis duplicatas, extrair apenas dados comprováveis, registrar lacunas sem inventá-las, preencher AE quando o portal confirmar a data, preencher AF com a data da inserção, editar a linha apropriada na planilha e reler a linha para validar o resultado. O acesso ao repositório GitHub, por si só, não autoriza a edição da planilha. Não incluir tokens ou credenciais em células, código ou instruções.

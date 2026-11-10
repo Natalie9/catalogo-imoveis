@@ -13,6 +13,11 @@ test('CSV suporta aspas, vírgulas, quebras de linha e células vazias',()=>{
 test('converte números brasileiros, quartos mistos, coordenadas e fotos',()=>{
  const {data,warnings}=s.houses(table());assert.equal(warnings.length,0);assert.equal(data[0].p,340000);assert.equal(data[0].l,220.5);assert.equal(data[0].q,3);assert.equal(data[0].lat,-16.591);assert.ok(data[0].km>0);assert.deepEqual(data[0].img,['https://example.com/1.jpg']);
 });
+test('lê as datas do anúncio e de inclusão na tabela sem exigir valores históricos',()=>{
+ const d=s.houses(table({'Data do anúncio':'03/11/2026','Data de inclusão na planilha':'04/11/2026'})).data[0];
+ assert.equal(d.postedAt,'03/11/2026');assert.equal(d.addedAt,'04/11/2026');
+ const missing=s.houses(table()).data[0];assert.equal(missing.postedAt,'');assert.equal(missing.addedAt,'');
+});
 test('colunas podem ser reordenadas; campos vazios não viram zero',()=>{
  const t=table({'Preço (R$)':'','Latitude':'','Longitude':''}).map(r=>r.toReversed());
  const d=s.houses(t).data[0];assert.equal(d.p,null);assert.equal(d.lat,null);assert.equal(d.km,null);

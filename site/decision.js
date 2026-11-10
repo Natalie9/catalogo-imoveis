@@ -11,6 +11,7 @@
   const dialog=$('#property-dialog'),content=$('#dialog-content');
   const n=v=>v==null?missing:Number(v).toLocaleString('pt-BR');
   const m2=v=>v==null?missing:n(v)+' m²';
+  const dateLabel=v=>{const s=String(v??'').trim();if(!s)return missing;let m=s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/);if(m){const d=new Date(+m[3],+m[2]-1,+m[1]);return d.getFullYear()===+m[3]&&d.getMonth()===+m[2]-1&&d.getDate()===+m[1]?d.toLocaleDateString('pt-BR'):s}m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m){const d=new Date(+m[1],+m[2]-1,+m[3]);return d.getFullYear()===+m[1]&&d.getMonth()===+m[2]-1&&d.getDate()===+m[3]?d.toLocaleDateString('pt-BR'):s}return s;};
   const money=v=>v==null?missing:brl(v);
   const say=text=>{$('#decision-message').textContent=text;};
   const pool=d=>d.pool?({sim:'Piscina privativa',cond:'Piscina do condomínio',prev:'Espaço para piscina'}[d.pool]):d.poolInfo||missing;
@@ -57,6 +58,7 @@
     content.innerHTML=`<p class="muted">${esc(d.cid||missing)} · ${esc(id)}</p>
       <div class="detail-gallery">${d.img.length?d.img.map((src,i)=>`<a href="${esc(src)}" target="_blank" rel="noopener" aria-label="Abrir foto ${i+1}"><img src="${esc(src)}" loading="lazy" alt="Foto ${i+1} do anúncio em ${esc(d.b)}"></a>`).join(''):'<p>Sem foto disponível</p>'}</div>
       <h3>Informações do anúncio</h3><p class="muted">Dados informados; confirmação e origem aparecem abaixo quando registradas.</p><dl class="property-facts">${fields.slice(0,15).map(([label,get])=>`<div><dt>${esc(label)}</dt><dd>${esc(get(d)||missing)}</dd></div>`).join('')}<div><dt>Precisão da localização</dt><dd>${esc(d.gp)}</dd></div></dl>
+      <h3>Datas</h3><dl class="property-timeline"><div><dt>Data do anúncio</dt><dd>${esc(dateLabel(d.postedAt))}</dd></div><div><dt>Inserido na planilha</dt><dd>${esc(dateLabel(d.addedAt))}</dd></div></dl>
       <h3>Avaliação compartilhada</h3><p>${ratingDifference(d)}</p><div class="aval" data-id="${id}">${avalFullHTML(d)}</div>
       ${d.nat?`<p>Comentário histórico de Natalie: ${esc(d.nat)}</p>`:''}
       <h3>Alertas e verificações</h3><p>${esc(fields.at(-1)[1](d))}</p><p class="muted">Alertas por palavras-chave são indícios a conferir.</p>
