@@ -6,18 +6,28 @@
   const el=document.createElement('div');
   el.innerHTML=`<div id="decision-message" role="status" aria-live="polite"></div>
     <aside id="compare-bar" class="compare-bar" aria-label="Seleção para comparação" hidden></aside>
-    <dialog id="property-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><h2 id="dialog-title" tabindex="-1"></h2><button type="button" id="dialog-close" aria-label="Fechar painel">Fechar</button></div><div id="dialog-content"></div></dialog>`;
+    <dialog id="property-dialog" aria-labelledby="dialog-title"><div class="dialog-top"><div><h2 id="dialog-title" tabindex="-1"></h2><p id="dialog-subtitle" hidden></p></div><button type="button" id="dialog-close" aria-label="Fechar painel">Fechar</button></div><div id="dialog-content"></div><nav id="dialog-actions" class="dialog-actions detail-actions" aria-label="Ações do imóvel" hidden></nav></dialog>`;
   document.body.append(el);
-  const dialog=$('#property-dialog'),content=$('#dialog-content');
+  const dialog=$('#property-dialog'),content=$('#dialog-content'),actionDock=$('#dialog-actions');
   const n=v=>v==null?missing:Number(v).toLocaleString('pt-BR');
   const m2=v=>v==null?missing:n(v)+' m²';
   const money=v=>v==null?missing:brl(v);
   const say=text=>{$('#decision-message').textContent=text;};
   const pool=d=>d.pool?({sim:'Piscina privativa',cond:'Piscina do condomínio',prev:'Espaço para piscina'}[d.pool]):d.poolInfo||missing;
+  const hasInfo=v=>v!=null&&String(v).trim()!==''&&String(v).trim()!==missing;
+  function whatsappNumber(value){
+    const raw=String(value||'').trim();if(!raw)return '';
+    const international=raw.startsWith('+');const digits=raw.replace(/\D/g,'');
+    if(international)return digits.length>=8&&digits.length<=15?digits:'';
+    if(/^55[1-9]\d{9,10}$/.test(digits))return digits;
+    if(/^0[1-9]\d{9,10}$/.test(digits))return '55'+digits.slice(1);
+    if(/^[1-9]\d{9,10}$/.test(digits))return '55'+digits;
+    return '';
+  }
   const fields=[['Preço',d=>money(d.p)],['Bairro',d=>d.b],['Cidade',d=>d.cid],['Área do lote',d=>m2(d.lot)],['Área construída',d=>m2(d.built)],['Quartos',d=>n(d.q)],['Suítes',d=>n(d.suites)],['Banheiros',d=>n(d.baths)],['Garagem',d=>n(d.parking)],['Quintal',d=>d.qt],['Piscina',pool],['Financiamento informado',d=>d.fin||d.f],['Condomínio',d=>money(d.condo)],['IPTU (periodicidade a conferir)',d=>money(d.iptu)],['UFG · linha reta',d=>d.km==null?missing:n(d.km)+' km'],['Nota Natalie',d=>NOTAS[d.id]?.natalie?NOTAS[d.id].natalie+'/5':missing],['Nota Jéssica',d=>NOTAS[d.id]?.jessica?NOTAS[d.id].jessica+'/5':missing],['Média das notas disponíveis',d=>media(d.id)==null?missing:n(media(d.id))+'/5'],['Alertas do anúncio',d=>d.tags.filter(t=>['bad','warn','off'].includes(t[0])).map(t=>t[1]).join('; ')||'Nenhum sinalizado']];
   function open(title,mode,id){
     previousFocus=document.activeElement;current={mode,id};
-    $('#dialog-title').textContent=title;content.innerHTML='';
+    $('#dialog-title').textContent=title;$('#dialog-subtitle').hidden=true;$('#dialog-subtitle').textContent='';content.innerHTML='';actionDock.innerHTML='';actionDock.hidden=true;
     if(!dialog.open)dialog.showModal();$('#dialog-title').focus();
   }
   function close(){
@@ -29,8 +39,8 @@
   }
   $('#dialog-close').addEventListener('click',close);
   dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
-  function actions(d){return `<div class="card-actions"><button type="button" data-sheet-edit="${d.id}">Editar na planilha</button><button type="button" data-compare="${d.id}">Comparar</button><a href="${esc(d.u)}" target="_blank" rel="noopener">Abrir anúncio</a>${d.st==='Rejeitado'?'<span>Rejeitado na planilha: altere o Status na planilha para recuperar.</span>':`<button type="button" class="disc" data-id="${d.id}" ${DBSTATE!=='ready'?'disabled':''}>${DESC[d.id]?'Recuperar imóvel':'Descartar esta casa'}</button>`}</div><p class="sheet-edit-status" role="status" aria-live="polite"></p>`;}
-  function editStatus(message){say(message);content.querySelectorAll('.sheet-edit-status').forEach(el=>el.textContent=message);}
+  function actions(d){const phone=whatsappNumber(d.c);return `<div class="card-actions">${phone?`<a class="action-whatsapp" href="https://wa.me/${phone}" target="_blank" rel="noopener noreferrer" aria-label="Entrar em contato pelo WhatsApp">WhatsApp</a>`:''}<a href="${esc(d.u)}" target="_blank" rel="noopener noreferrer">Abrir anúncio</a><button type="button" data-sheet-edit="${d.id}">Editar na planilha</button><button type="button" data-compare="${d.id}" aria-pressed="false">Comparar</button>${d.st==='Rejeitado'?'<span class="action-status">Rejeitado na planilha: altere o Status na planilha para recuperar.</span>':`<button type="button" class="disc" data-id="${d.id}" ${DBSTATE!=='ready'?'disabled':''}>${DESC[d.id]?'Recuperar imóvel':'Descartar esta casa'}</button>`}</div><p class="sheet-edit-status" role="status" aria-live="polite"></p>`;}
+  function editStatus(message){say(message);content.querySelectorAll('.sheet-edit-status').forEach(el=>el.textContent=message);actionDock.querySelectorAll('.sheet-edit-status').forEach(el=>el.textContent=message);}
   function syncEditButtons(){document.querySelectorAll('[data-sheet-edit]').forEach(button=>{const busy=locating.has(button.dataset.sheetEdit);button.disabled=busy;button.textContent=busy?'Localizando imóvel…':'Editar na planilha';});}
   async function editInSheet(id){
     if(locating.has(id))return;
@@ -54,14 +64,23 @@
   function detail(id){
     const d=DATA.find(d=>d.id===id);if(!d)return;
     open(d.b||'Detalhes do imóvel','detail',id);
-    content.innerHTML=`<p class="muted">${esc(d.cid||missing)} · ${esc(id)}</p>
-      <div class="detail-gallery">${d.img.length?d.img.map((src,i)=>`<a href="${esc(src)}" target="_blank" rel="noopener" aria-label="Abrir foto ${i+1}"><img src="${esc(src)}" loading="lazy" alt="Foto ${i+1} do anúncio em ${esc(d.b)}"></a>`).join(''):'<p>Sem foto disponível</p>'}</div>
-      <h3>Informações do anúncio</h3><p class="muted">Dados informados; confirmação e origem aparecem abaixo quando registradas.</p><dl class="property-facts">${fields.slice(0,15).map(([label,get])=>`<div><dt>${esc(label)}</dt><dd>${esc(get(d)||missing)}</dd></div>`).join('')}<div><dt>Precisão da localização</dt><dd>${esc(d.gp)}</dd></div></dl>
-      <h3>Avaliação compartilhada</h3><p>${ratingDifference(d)}</p><div class="aval" data-id="${id}">${avalFullHTML(d)}</div>
-      ${d.nat?`<p>Comentário histórico de Natalie: ${esc(d.nat)}</p>`:''}
-      <h3>Alertas e verificações</h3><p>${esc(fields.at(-1)[1](d))}</p><p class="muted">Alertas por palavras-chave são indícios a conferir.</p>
-      <dl class="property-facts">${[['Área informada originalmente (tipo a conferir)',d.areaReported==null?'':m2(d.areaReported)],['Endereço',d.rua],['Imobiliária',d.i],['Contato',d.c],['Observações do anúncio',d.com],['Informações confirmadas',d.confirmed],['Pendências',d.pending],['Ágio',d.agio],['Data da conferência',d.checked],['Fonte da conferência',d.source]].map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v||missing)}</dd></div>`).join('')}</dl>
-      ${actions(d)}`;
+    const subtitle=[d.cid,id].filter(Boolean).join(' · ');$('#dialog-subtitle').textContent=subtitle;$('#dialog-subtitle').hidden=false;
+    const rows=[
+      ['Características',[
+        ['Quartos',n(d.q)],['Suítes',n(d.suites)],['Banheiros',n(d.baths)],['Garagem',n(d.parking)],['Área do lote',m2(d.lot)],['Área construída',m2(d.built)],['Quintal',d.qt],['Piscina',pool(d)],['Área informada originalmente (tipo a conferir)',d.areaReported==null?'':m2(d.areaReported)]]],
+      ['Custos e condições',[
+        ['Financiamento informado',d.fin||d.f],['Condomínio',money(d.condo)],['IPTU (periodicidade a conferir)',money(d.iptu)],['Ágio',d.agio]]],
+      ['Localização e origem',[
+        ['Endereço',d.rua],['Precisão da localização',d.gp],['Distância da UFG · linha reta',d.km==null?'':n(d.km)+' km'],['Imobiliária',d.i],['Contato',d.c],['Data da conferência',d.checked],['Fonte da conferência',d.source]]],
+      ['Observações e verificações',[
+        ['Observações do anúncio',d.com],['Informações confirmadas',d.confirmed],['Pendências',d.pending],['Alertas do anúncio',fields.at(-1)[1](d)]]]
+    ];
+    const allRows=rows.flatMap(([,items])=>items),missingRows=allRows.filter(([,value])=>!hasInfo(value));
+    const section=([title,items],i)=>{const present=items.filter(([,value])=>hasInfo(value));if(!present.length)return '';return `<details class="detail-section"${i===0?' open':''}><summary><h3>${esc(title)}</h3><span>${present.length} ${present.length===1?'dado':'dados'}</span></summary><dl class="property-facts">${present.map(([label,value])=>`<div${['Observações do anúncio','Informações confirmadas','Pendências','Alertas do anúncio'].includes(label)?' class="fact-wide"':''}><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl></details>`;};
+    content.innerHTML=`<section class="detail-hero" aria-label="Resumo do imóvel"><div><p class="detail-price">${esc(money(d.p))}</p><p class="detail-address">${esc(d.b||missing)}${d.cid?' · '+esc(d.cid):''}</p></div><div class="detail-badges"><span class="detail-badge">${esc(d.st||'Em avaliação')}</span>${d.s?`<span class="detail-badge">${esc(origem(d))}</span>`:''}</div><div class="detail-highlights">${[[d.q==null?'':n(d.q)+' quartos'],[d.lot==null?'':m2(d.lot)+' de lote'],[d.built==null?'':m2(d.built)+' construídos']].flat().filter(Boolean).map(x=>`<span>${esc(x)}</span>`).join('')}</div></section>
+      <section class="detail-gallery" aria-label="Fotos do imóvel">${d.img.length?d.img.map((src,i)=>`<a href="${esc(src)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir foto ${i+1} de ${d.img.length}"><img src="${esc(src)}" loading="lazy" alt="Foto ${i+1} do anúncio em ${esc(d.b)}"></a>`).join(''):`<p class="gallery-empty">Nenhuma foto cadastrada.</p>`}${d.img.length>1?`<span class="photo-count">${d.img.length} fotos · deslize para ver</span>`:''}</section>
+      <div class="detail-sections">${rows.map(section).join('')}<details class="detail-section rating-section" open><summary><h3>Avaliações</h3><span>Notas e comentários</span></summary><div class="rating-content"><p>${esc(ratingDifference(d))}</p><div class="aval" data-id="${id}">${avalFullHTML(d)}</div>${d.nat?`<p>Comentário histórico de Natalie: ${esc(d.nat)}</p>`:''}</div></details>${missingRows.length?`<details class="detail-section missing-section"><summary><h3>Campos sem informação</h3><span>${missingRows.length}</span></summary><ul>${missingRows.map(([label])=>`<li>${esc(label)}</li>`).join('')}</ul></details>`:''}</div>`;
+    actionDock.innerHTML=actions(d);actionDock.hidden=false;
     content.querySelector('.comments').open=true;
     syncCompare();
   }

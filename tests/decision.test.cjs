@@ -34,8 +34,13 @@ test('métricas mostram total, ativos e rejeitados independentemente dos filtros
  assert.equal(a.d.querySelector('.stat.neutral b').textContent,'2');assert.equal(a.d.querySelector('.stat.ok b').textContent,'1');assert.equal(a.d.querySelector('.stat.rejected b').textContent,'1');
  a.input('#q','nenhum resultado');assert.equal(a.d.querySelectorAll('.card').length,0);assert.equal(a.d.querySelector('.stat.neutral b').textContent,'2');
 });
-test('detalhes escapam conteúdo inseguro e mantêm ausentes explícitos',async t=>{
- const a=app(t),r=row('A');r[10]='<img src=x onerror=alert(1)>';r[21]='';a.setRows([r]);a.refresh();await until(()=>a.d.querySelector('.card'));a.d.querySelector('[data-detail]').click();assert.equal(a.d.querySelector('#property-dialog').open,true);assert.match(a.d.querySelector('#dialog-content').textContent,/<img src=x/);assert.equal(a.d.querySelector('#dialog-content [onerror]'),null);assert.match(a.d.querySelector('#dialog-content').textContent,/Não informado/);a.d.querySelector('#dialog-close').click();assert.equal(a.d.querySelector('#property-dialog').open,false);
+test('detalhes escapam conteúdo inseguro e agrupam campos ausentes',async t=>{
+ const a=app(t),r=row('A');r[10]='<img src=x onerror=alert(1)>';r[21]='';a.setRows([r]);a.refresh();await until(()=>a.d.querySelector('.card'));a.d.querySelector('[data-detail]').click();assert.equal(a.d.querySelector('#property-dialog').open,true);assert.match(a.d.querySelector('#dialog-content').textContent,/<img src=x/);assert.equal(a.d.querySelector('#dialog-content [onerror]'),null);assert.match(a.d.querySelector('.missing-section summary').textContent,/Campos sem informação/);assert.ok(a.d.querySelector('#dialog-actions').matches(':not([hidden])'));a.d.querySelector('#dialog-close').click();assert.equal(a.d.querySelector('#property-dialog').open,false);
+});
+test('modal reorganiza características e mostra WhatsApp só para telefone válido',async t=>{
+ const a=app(t),r=row('A');r[8]='(62) 99999-9999';a.setRows([r]);a.refresh();await until(()=>a.d.querySelector('.card'));a.d.querySelector('[data-detail]').click();
+ assert.equal(a.d.querySelector('.detail-price').textContent,'R$ 420.000');assert.equal(a.d.querySelectorAll('.detail-section').length>=4,true);assert.equal(a.d.querySelector('#dialog-actions .action-whatsapp').href,'https://wa.me/5562999999999');assert.match(a.d.querySelector('.detail-highlights').textContent,/3 quartos/);
+ const b=app(t),invalid=row('INVALID');invalid[8]='Contato sem número';b.setRows([invalid]);b.refresh();await until(()=>b.d.querySelector('.idtag')?.textContent==='INVALID');b.d.querySelector('[data-detail]').click();assert.equal(b.d.querySelector('#dialog-actions .action-whatsapp'),null);
 });
 test('comparação permite 2–4 sem duplicar, calcula diferenças e atualiza após polling',async t=>{
  const a=app(t);a.setRows(['A','B','C','D','E'].map((id,i)=>row(id,400000+i*10000)));a.refresh();await until(()=>a.d.querySelectorAll('.card').length===5);
@@ -45,7 +50,7 @@ test('comparação permite 2–4 sem duplicar, calcula diferenças e atualiza ap
 });
 test('editar localiza o ID após reordenação, inclusive com detalhes antigos abertos',async t=>{
  const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.d.querySelector('[data-detail="A"]').click();a.setRows([row('B'),row('A')]);
- a.d.querySelector('#dialog-content [data-sheet-edit="A"]').click();await until(()=>a.opened[0]?.url);
+ a.d.querySelector('#dialog-actions [data-sheet-edit="A"]').click();await until(()=>a.opened[0]?.url);
  assert.match(a.opened[0].url,/gid=2136363186&range=M3$/);assert.equal(a.opened[0].opener,null);assert.equal(a.d.querySelector('[data-edit]'),null);assert.equal(a.eval('DATA.find(d=>d.id==="A").r'),2);
 });
 test('ID ausente ou duplicado bloqueia a abertura, mesmo se a linha duplicada for inválida',async t=>{
