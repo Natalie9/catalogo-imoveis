@@ -28,6 +28,12 @@ test('lote e área construída não se misturam no filtro',async t=>{
 test('comentário meu respeita autora e filtros individuais',async t=>{
  const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("COMS={A:[{pessoa:'jessica',texto:'texto'}],B:[{pessoa:'natalie',texto:'texto'}]};NOTAS={A:{jessica:5},B:{natalie:4,jessica:3}};ME='natalie';S.onlynat=true;render()");assert.equal(a.d.querySelector('.idtag').textContent,'B');a.eval("S.onlynat=false;S.natmin='sem';render()");assert.equal(a.d.querySelector('.idtag').textContent,'A');
 });
+test('notas individuais e média filtram pelo valor exato',async t=>{
+ const a=app(t),rows=['A','B','C','D','E'].map(id=>row(id));a.setRows(rows);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===5);
+ a.eval("NOTAS={A:{natalie:1,jessica:5},B:{natalie:2,jessica:5},C:{natalie:3,jessica:3},D:{natalie:4,jessica:5}};S.natmin='1';render()");assert.deepEqual([...a.d.querySelectorAll('.idtag')].map(e=>e.textContent),['A']);
+ a.eval("S.natmin='0';S.jesmin='5';render()");assert.deepEqual([...a.d.querySelectorAll('.idtag')].map(e=>e.textContent),['A','B','D']);
+ a.eval("S.jesmin='0';S.nmin='4.5';render()");assert.deepEqual([...a.d.querySelectorAll('.idtag')].map(e=>e.textContent),['D']);
+});
 test('métricas mostram total, ativos e rejeitados independentemente dos filtros',async t=>{
  const a=app(t),rejected=row('R');rejected[11]='Rejeitado';a.setRows([row('A'),rejected]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===1);
  assert.equal(a.d.querySelector('.stats-scope').textContent,'No catálogo');

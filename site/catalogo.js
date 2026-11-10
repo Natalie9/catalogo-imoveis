@@ -55,7 +55,7 @@ function filtered(){
     if((S.pmin!=null||S.pmax!=null)&&(d.p==null||(S.pmin!=null&&d.p<S.pmin)||(S.pmax!=null&&d.p>S.pmax)))return false;
     {const area=S.area==="construida"?d.built:d.lot;if((S.lmin!=null||S.lmax!=null)&&(area==null||(S.lmin!=null&&area<S.lmin)||(S.lmax!=null&&area>S.lmax)))return false}
     if(S.fin&&CatalogoSheets.finance(d.f||d.fin)!==S.fin)return false;
-    for(const [key,p] of [["natmin","natalie"],["jesmin","jessica"]]){const v=(NOTAS[d.id]||{})[p];if(S[key]==="sem"&&v>0)return false;if(+S[key]>0&&!(v>=+S[key]))return false;}
+    for(const [key,p] of [["natmin","natalie"],["jesmin","jessica"]]){const v=(NOTAS[d.id]||{})[p];if(S[key]==="sem"&&v>0)return false;if(S[key]!=="0"&&S[key]!==""&&S[key]!=="sem"&&Number.isFinite(+S[key])&&+S[key]>0&&v!==+S[key])return false;}
     if(S.pool==="sim"&&!(d.pool==="sim"||d.pool==="cond"))return false;
     if(S.pool==="prev"&&!d.pool)return false;
     if(S.imob&&normK(imobNome(d))!==S.imob)return false;
@@ -67,7 +67,7 @@ function filtered(){
     if(S.nmin&&S.nmin!=="0"){const m=media(d.id),n=nRaters(d.id);
       if(S.nmin==="sem"){if(m!=null)return false}
       else if(S.nmin==="duas"){if(n<2)return false}
-      else if(m==null||m<+S.nmin)return false}
+      else if(m==null||Math.abs(m-(+S.nmin))>1e-9)return false}
     return true});
   const big=1e12;
   const k={nota:d=>-((media(d.id)??-1)*10+nRaters(d.id)),km:d=>d.km??big,p:d=>d.p??big,pd:d=>-(d.p??-big),l:d=>-((S.area==="construida"?d.built:d.lot)??-big),la:d=>(S.area==="construida"?d.built:d.lot)??big,notaa:d=>{const m=media(d.id);return m==null?big:m*10-nRaters(d.id)}}[S.sort];
@@ -141,7 +141,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelect
 function stats(){
   const total=DATA.length, rejected=DATA.filter(isGone).length, active=total-rejected;
   const pct=v=>total?Math.round(v/total*100):0;
-  const tile=(cls,val,label,p)=>`<div class="stat ${cls}"><div class="stat-top"><b>${val??"—"}</b>${p!=null?`<span class="pct">${p}%</span>`:""}</div><span class="stat-label">${label}</span>${p!=null?`<div class="bar" role="progressbar" aria-label="${label}: ${p}% das casas ativas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}"><i style="width:${p}%"></i></div>`:""}</div>`;
+  const tile=(cls,val,label,p)=>`<div class="stat ${cls}"><div class="stat-top"><b>${val??"—"}</b>${p!=null?`<span class="pct">${p}%</span>`:""}</div><span class="stat-label">${label}</span>${p!=null?`<div class="bar" role="progressbar" aria-label="${label}: ${p}% do catálogo" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}"><i style="width:${p}%"></i></div>`:""}</div>`;
   $("#stats").innerHTML='<p class="stats-scope">No catálogo</p>'
     +tile("neutral",total,"total",null)+tile("ok",active,"ativos",pct(active))+tile("rejected",rejected,"rejeitados",pct(rejected));
 }
