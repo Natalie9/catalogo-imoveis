@@ -2,7 +2,7 @@
 
 Google Sheets é a única base de dados. Nunca cadastre ou altere imóveis editando este repositório.
 
-- Planilha: https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit
+- Planilha: https://docs.google.com/spreadsheets/d/1TaUluQulubmyRxq2qgPJEYHAmfKsZtX_VQOCmdqpq2I/edit
 - Leia `docs/ADICIONAR_CASAS.md` antes de modificar dados na planilha.
 - Leia a linha atual e procure o ID/link antes de inserir, evitando duplicatas. Preserve o ID quando editar ou reordenar linhas.
 - Não altere notas, comentários pessoais e descartes sem instrução explícita. As abas `notas`, `comentarios` e `descartes` são a fonte das avaliações.

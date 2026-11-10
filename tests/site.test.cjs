@@ -10,7 +10,7 @@ function app(t){
  const w=dom.window;w.CSS={escape:s=>s};w.AbortSignal=AbortSignal;w.console.warn=()=>{};
  let rows=[row('TEST-1')],fail=false,apiFail=false;const polls=[];
  w.setInterval=fn=>{polls.push(fn);return polls.length};
- w.fetch=async u=>{if(String(u).includes('/export?')){if(fail)throw Error('Sem rede');return {ok:true,text:async()=>csv(rows)}}if(apiFail)throw Error('API indisponível');return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})}};
+ w.fetch=async u=>{if(String(u).includes('/export?')){if(fail)throw Error('Sem rede');return {ok:true,text:async()=>csv(rows)}}if(apiFail)throw Error('API indisponível');return {ok:true,json:async()=>({spreadsheetId:w.CATALOGO_CONFIG.spreadsheetId,notas:[],comentarios:[],descartes:[]})}};
  w.HTMLDialogElement.prototype.showModal=function(){this.open=true;};w.HTMLDialogElement.prototype.close=function(){this.open=false;};
  for(const f of ['config.js','sheets.js','ghdb.js'])w.eval(fs.readFileSync(path.join(root,f),'utf8'));
  for(const f of ['catalogo.js','decision.js'])require('node:vm').runInContext(fs.readFileSync(path.join(root,f),'utf8'),dom.getInternalVMContext());

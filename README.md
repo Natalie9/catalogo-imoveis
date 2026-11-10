@@ -3,7 +3,7 @@
 Painel das casas que Natalie e Jéssica avaliam em Goiânia/Aparecida.
 
 - [Site](https://natalie9.github.io/catalogo-imoveis/)
-- [Base no Google Sheets](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit)
+- [Base no Google Sheets](https://docs.google.com/spreadsheets/d/1TaUluQulubmyRxq2qgPJEYHAmfKsZtX_VQOCmdqpq2I/edit)
 
 ## Atualizar imóveis
 
@@ -24,7 +24,7 @@ Fotos são **links** na coluna Fotos: uma URL, uma URL por linha ou um array JSO
 | comentarios | Comentários por ID da casa |
 | descartes | Casas descartadas no painel |
 
-N–Q de Imóveis são registros históricos preservados. O site usa as três abas de avaliações, não esses campos antigos.
+N–Q de Imóveis são resumos calculados por ID a partir das três abas de avaliações. Não edite essas fórmulas manualmente. O site usa as abas de avaliações.
 
 Não há Excel, CSV ou JSON de imóveis no repositório. O CSV online é processado em memória. O PDF de visitas em dados/ é um documento histórico, sem participação no site.
 

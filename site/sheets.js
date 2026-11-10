@@ -116,6 +116,14 @@
         poolInfo:String(at(v,'Piscina'))});
       const house=out[out.length-1];house.lot=house.lc?null:house.l;
       if(house.built==null&&house.lc)house.built=house.l;
+      // Na base normalizada, lote e construção são colunas independentes.
+      // A metragem sem tipo confirmado fica apenas como referência.
+      if(headers.includes(norm('Área informada (m²)'))){
+        house.lc=false;
+        house.lot=house.l=positive(at(v,'Área do lote (m²)'));
+        house.built=positive(at(v,'Área construída (m²)'));
+        house.areaReported=positive(at(v,'Área informada (m²)'));
+      }
     });
     return {data:out,warnings};
   }
