@@ -14,7 +14,7 @@ Os campos são identificados pelo cabeçalho, permitindo reordenar colunas. Não
 | B | Bairro | Texto |
 | C | Rua / endereço aproximado | Texto |
 | D | Preço (R$) | Número |
-| E | Área do lote (m²) | Número; se construída, indicar em Z |
+| E | Área do lote (m²) | Número; somente lote |
 | F | Quartos | Número ou texto iniciado com número |
 | G | Quintal | Texto |
 | H | Financia? | Texto |
@@ -23,7 +23,7 @@ Os campos são identificados pelo cabeçalho, permitindo reordenar colunas. Não
 | K | Comentários | Observações sobre o anúncio |
 | L | Status | Em avaliação ou Rejeitado |
 | M | ID do anúncio | Obrigatório, único e estável; letras, números, hífen e sublinhado |
-| N–Q | Campos antigos do painel | Histórico; não usado pela interface |
+| N–Q | Campos antigos do painel | Fórmulas de resumo por ID; não usadas pela interface |
 | R | Latitude | Número decimal, opcional |
 | S | Longitude | Número decimal, opcional |
 | T | Distância UFG (km) | Número; calculado a partir de R/S se vazio |
@@ -32,11 +32,17 @@ Os campos são identificados pelo cabeçalho, permitindo reordenar colunas. Não
 | W | Fotos | URL, URLs separadas por quebras de linha ou array JSON |
 | X | Fora do ar | Sim ou Não |
 | Y | Piscina | sim, cond, prev, não; vazio infere pelos comentários |
-| Z | Tipo de área | lote ou construída |
+| Z | Tipo de área | lote, construida ou a confirmar |
+| AA | Área construída (m²) | Número, somente construção |
+| AB | Área informada (m²) | Metragem original; não participa dos filtros |
+| AC | Situação do financiamento | Detalhes preservados; H é a opção normalizada |
+| AD | Pendências | Informações a confirmar |
 
 Campos ausentes não viram zero. Números com formatação brasileira são aceitos. Links são restritos a HTTP(S) e textos são escapados antes da inserção no HTML. Distâncias são em linha reta até o Campus Samambaia da UFG.
 
-Área do lote (`lot`) e construída (`built`) são separadas no leitor. Se Z indica
+Na base normalizada, a presença de AB ativa a leitura estrita: lote vem somente de E, construção de AA, e AB é apenas referência. O filtro de financiamento usa H.
+
+Compatibilidade com bases antigas sem AB: área do lote (`lot`) e construída (`built`) são separadas no leitor. Se Z indica
 construída, E não é tratado como lote; a coluna opcional Área construída (m²)
 prevalece quando informada. Tipo de área explícito prevalece sobre inferências
 legadas dos comentários. Filtros e diferenças comparam somente a mesma natureza

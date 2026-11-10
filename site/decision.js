@@ -60,7 +60,7 @@
       <h3>Avaliação compartilhada</h3><p>${ratingDifference(d)}</p><div class="aval" data-id="${id}">${avalFullHTML(d)}</div>
       ${d.nat?`<p>Comentário histórico de Natalie: ${esc(d.nat)}</p>`:''}
       <h3>Alertas e verificações</h3><p>${esc(fields.at(-1)[1](d))}</p><p class="muted">Alertas por palavras-chave são indícios a conferir.</p>
-      <dl class="property-facts">${[['Endereço',d.rua],['Imobiliária',d.i],['Contato',d.c],['Observações do anúncio',d.com],['Informações confirmadas',d.confirmed],['Pendências',d.pending],['Ágio',d.agio],['Data da conferência',d.checked],['Fonte da conferência',d.source]].map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v||missing)}</dd></div>`).join('')}</dl>
+      <dl class="property-facts">${[['Área informada originalmente (tipo a conferir)',d.areaReported==null?'':m2(d.areaReported)],['Endereço',d.rua],['Imobiliária',d.i],['Contato',d.c],['Observações do anúncio',d.com],['Informações confirmadas',d.confirmed],['Pendências',d.pending],['Ágio',d.agio],['Data da conferência',d.checked],['Fonte da conferência',d.source]].map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v||missing)}</dd></div>`).join('')}</dl>
       ${actions(d)}`;
     content.querySelector('.comments').open=true;
     syncCompare();

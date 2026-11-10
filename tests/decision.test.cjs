@@ -12,7 +12,7 @@ function app(t){
  w.open=()=>{const popup={opener:'original',closed:false,url:null,location:{replace:url=>popup.url=url},close:()=>popup.closed=true};opened.push(popup);return popup;};
  w.setInterval=fn=>{polls.push(fn);return polls.length;};
  const posts=[];w.prompt=()=>{throw Error('senha pedida');};
- w.fetch=async(url,options={})=>{if(options.method==='POST'){posts.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true})};}if(String(url).includes('/export?')){if(fail)throw Error('Sem conexão');return {ok:true,text:async()=>csv(rows)};}return {ok:true,json:async()=>({notas:[],comentarios:[],descartes:[]})};};
+ w.fetch=async(url,options={})=>{if(options.method==='POST'){posts.push(JSON.parse(options.body));return {ok:true,json:async()=>({ok:true})};}if(String(url).includes('/export?')){if(fail)throw Error('Sem conexão');return {ok:true,text:async()=>csv(rows)};}return {ok:true,json:async()=>({spreadsheetId:w.CATALOGO_CONFIG.spreadsheetId,notas:[],comentarios:[],descartes:[]})};};
  for(const f of ['config.js','sheets.js','ghdb.js','catalogo.js','decision.js'])vm.runInContext(fs.readFileSync(__dirname+'/../site/'+f,'utf8'),dom.getInternalVMContext());
  const input=(id,value)=>{const e=d.querySelector(id);e.value=value;e.dispatchEvent(new w.Event('input',{bubbles:true}));};
  return {w,d,polls,posts,opened,input,eval:s=>vm.runInContext(s,dom.getInternalVMContext()),refresh:()=>d.querySelector('#syncbtn').click(),setRows:v=>rows=v,setFailure:v=>fail=v};

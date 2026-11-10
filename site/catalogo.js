@@ -54,7 +54,7 @@ function filtered(){
     if(q&&!normK(d.b+" "+(d.rua||"")+" "+(d.i||"")+" "+d.s+" "+(d.c||"")+" "+d.id+" "+d.cid).includes(q))return false;
     if((S.pmin!=null||S.pmax!=null)&&(d.p==null||(S.pmin!=null&&d.p<S.pmin)||(S.pmax!=null&&d.p>S.pmax)))return false;
     {const area=S.area==="construida"?d.built:d.lot;if((S.lmin!=null||S.lmax!=null)&&(area==null||(S.lmin!=null&&area<S.lmin)||(S.lmax!=null&&area>S.lmax)))return false}
-    if(S.fin&&CatalogoSheets.finance(d.fin||d.f)!==S.fin)return false;
+    if(S.fin&&CatalogoSheets.finance(d.f||d.fin)!==S.fin)return false;
     for(const [key,p] of [["natmin","natalie"],["jesmin","jessica"]]){const v=(NOTAS[d.id]||{})[p];if(S[key]==="sem"&&v>0)return false;if(+S[key]>0&&!(v>=+S[key]))return false;}
     if(S.pool==="sim"&&!(d.pool==="sim"||d.pool==="cond"))return false;
     if(S.pool==="prev"&&!d.pool)return false;

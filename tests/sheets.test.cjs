@@ -29,3 +29,11 @@ test('piscina explícita e negação têm precedência; URLs com apóstrofos sã
  assert.deepEqual(s.images('https://example.com/a\'b.jpg\nhttps://example.com/c.jpg'),["https://example.com/a'b.jpg",'https://example.com/c.jpg']);
 });
 module.exports={table};
+
+test('base normalizada separa lote, construção e área de tipo desconhecido',()=>{
+ const t=table({'Área do lote (m²)':'','Tipo de área':'a confirmar','Comentários':'Coluna E com a área do anúncio'});
+ t[0].push('Área construída (m²)','Área informada (m²)');t[1].push('','150');
+ let d=s.houses(t).data[0];assert.equal(d.lot,null);assert.equal(d.built,null);assert.equal(d.areaReported,150);assert.equal(d.lc,false);
+ t[1][t[0].indexOf('Área construída (m²)')]='99';d=s.houses(t).data[0];assert.equal(d.built,99);assert.equal(d.lot,null);
+ t[1][t[0].indexOf('Área do lote (m²)')]='220';d=s.houses(t).data[0];assert.equal(d.lot,220);assert.equal(d.built,99);
+});

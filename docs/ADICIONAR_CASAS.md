@@ -1,6 +1,6 @@
 # Adicionar ou atualizar casas
 
-Use a [planilha online](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6eB73duTFmkoLQ_rvkKRZuuQEsX0/edit), aba **Imóveis**. Não altere arquivos do repositório para cadastrar casas.
+Use a [planilha online](https://docs.google.com/spreadsheets/d/1TaUluQulubmyRxq2qgPJEYHAmfKsZtX_VQOCmdqpq2I/edit), aba **Imóveis**. Não altere arquivos do repositório para cadastrar casas.
 
 1. Leia o anúncio e procure o ID/link antes de inserir. Se já existe, edite a mesma linha. Se parece ser a mesma casa de outra imobiliária, registre a relação nos comentários e confira antes de duplicar.
 2. Preencha A–M, preservando cabeçalhos e validações. Use números em preço, área e quartos. Não invente campos ausentes. M deve conter um ID único e estável.
@@ -11,7 +11,7 @@ Use a [planilha online](https://docs.google.com/spreadsheets/d/1eWDkxo6Nlr5mf-y6
 
 Para retirar da avaliação, prefira Status = Rejeitado ou o descarte pelo painel, preservando o histórico. Para remover da listagem, exclua a linha. Não mude o ID de uma casa avaliada: as avaliações ficariam separadas do cadastro.
 
-As abas notas, comentarios e descartes contêm as avaliações atuais. N–Q de Imóveis são campos históricos. Não sobrescreva avaliações ao incluir/atualizar anúncios.
+As abas notas, comentarios e descartes contêm as avaliações atuais. N–Q de Imóveis são fórmulas de resumo por ID. Ao inserir uma linha, copie as fórmulas da linha anterior ajustando a referência ao ID; não cole notas como valores fixos. Não sobrescreva avaliações ao incluir/atualizar anúncios.
 
 ## IDs por fonte
 
@@ -27,3 +27,7 @@ As abas notas, comentarios e descartes contêm as avaliações atuais. N–Q de 
 | Adão | ADAO-15430 |
 
 ChatGPT, Claude e automações no GitHub seguem o mesmo procedimento pela conexão autorizada com o Google Sheets. Acesso ao GitHub sozinho não concede edição na planilha. Não guarde tokens no código, nas células ou em instruções.
+
+## Áreas e informações pendentes
+
+E guarda apenas área do lote; AA guarda área construída. AB preserva a metragem original quando o tipo não está confirmado: ela não entra nos filtros de lote ou construção. Z indica lote, construida ou a confirmar. Nunca deduza o tipo apenas pelo tamanho. H aceita Sim, Não ou A confirmar; AC preserva detalhes do financiamento. AD registra pendências. Valores ausentes ficam vazios, nunca zero. Preserve os links das fotos.

@@ -20,10 +20,11 @@ const ABAS = {
   descartes:   ['id', 'casa', 'pessoa', 'quando']
 };
 const PESSOAS = ['natalie', 'jessica'];
+const PLANILHA_ID = '1TaUluQulubmyRxq2qgPJEYHAmfKsZtX_VQOCmdqpq2I';
 
 
 function aba_(nome) {
-  const ss = SpreadsheetApp.getActive();
+  const ss = SpreadsheetApp.openById(PLANILHA_ID);
   let s = ss.getSheetByName(nome);
   if (!s) {
     s = ss.insertSheet(nome);
@@ -54,12 +55,14 @@ function doGet(e) {
   const out = {};
   Object.keys(ABAS).forEach(n => { out[n] = ler_(n); });
   out.quando = new Date().toISOString();
+  out.spreadsheetId = PLANILHA_ID;
   return json_(out);
 }
 
 function doPost(e) {
   let b;
   try { b = JSON.parse(e.postData.contents); } catch (err) { return json_({ ok: false, erro: 'json' }); }
+  if (b.spreadsheetId !== PLANILHA_ID) return json_({ ok: false, erro: 'planilha divergente' });
   if (!ABAS[b.col]) return json_({ ok: false, erro: 'coleção' });
   const id = String(b.id || '').slice(0, 200);
   if (!id) return json_({ ok: false, erro: 'id' });

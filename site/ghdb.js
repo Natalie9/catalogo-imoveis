@@ -36,6 +36,7 @@
       const r = await fetch(C.apiUrl + (C.apiUrl.includes("?") ? "&" : "?") + "op=all&t=" + Date.now(), {signal: AbortSignal.timeout(25000), cache: "no-store", credentials: "omit"});
       if (!r.ok) throw new Error("HTTP " + r.status);
       const j = await r.json();
+      if (j.spreadsheetId !== C.spreadsheetId) throw new Error("A API de avaliações ainda não está conectada à planilha do catálogo.");
       if (!COLS.every(col => Array.isArray(j[col]))) throw new Error("Resposta de avaliações inválida");
       COLS.forEach(col => {
         const novo = {}; (j[col] || []).forEach(o => { if (o && o.id !== "" && o.id != null) novo[String(o.id)] = clean(o) });
@@ -56,9 +57,10 @@
     }
 
     async function write(op, col, id, data) {
+      await pull(); // Confirma o destino antes de cada gravação.
       // text/plain evita o "preflight" de CORS, que o Apps Script não responde
       const r = await fetch(C.apiUrl, { method: "POST", signal: AbortSignal.timeout(25000), headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ op, col, id, data }) });
+        body: JSON.stringify({ op, col, id, data, spreadsheetId: C.spreadsheetId }) });
       const j = await r.json().catch(() => ({ ok: false, erro: "resposta inválida" }));
       if (!j.ok) throw new Error(j.erro || "falha");
       pull().catch(() => {});
