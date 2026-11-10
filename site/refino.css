@@ -26,6 +26,7 @@ header.top .lede{margin:.15rem 0 14px}
 .stat.ok{border-left-color:var(--campus);color:var(--campus)}
 .stat.info{border-left-color:var(--info);color:var(--info)}
 .stat.pending{border-left-color:var(--warn);color:var(--warn)}
+.stat.rejected{border-left-color:var(--bad);color:var(--bad)}
 .stat b,.stat .stat-label{color:var(--ink)}.stat .stat-label{color:var(--muted)}
 
 /* ---------- barra de sincronização ---------- */

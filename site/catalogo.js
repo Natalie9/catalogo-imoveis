@@ -138,20 +138,19 @@ document.addEventListener("click",e=>{
   if(dv){const w=dv.parentNode,o=!w.classList.contains("open");w.classList.toggle("open",o);dv.setAttribute("aria-expanded",String(o))}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".divwrap.open").forEach(w=>{w.classList.remove("open");w.querySelector(".divtag").setAttribute("aria-expanded","false")})});
-function stats(a){
-  const ready=DBSTATE==="ready",n=a.length;
-  const rated=ready?a.filter(d=>nRaters(d.id)>0).length:null, both=ready?a.filter(d=>nRaters(d.id)===2).length:null, none=ready?a.filter(d=>nRaters(d.id)===0).length:null;
-  const pct=v=>v==null||!n?null:Math.round(v/n*100);
+function stats(){
+  const total=DATA.length, rejected=DATA.filter(isGone).length, active=total-rejected;
+  const pct=v=>total?Math.round(v/total*100):0;
   const tile=(cls,val,label,p)=>`<div class="stat ${cls}"><div class="stat-top"><b>${val??"—"}</b>${p!=null?`<span class="pct">${p}%</span>`:""}</div><span class="stat-label">${label}</span>${p!=null?`<div class="bar" role="progressbar" aria-label="${label}: ${p}% das casas ativas" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${p}"><i style="width:${p}%"></i></div>`:""}</div>`;
-  $("#stats").innerHTML='<p class="stats-scope">Nos resultados filtrados'+(ready?'':' · avaliações indisponíveis')+'</p>'
-    +tile("neutral",n,"ativos",null)+tile("ok",rated,"já avaliados",pct(rated))+tile("info",both,"pelas duas",pct(both))+tile("pending",none,"sem avaliação",pct(none));
+  $("#stats").innerHTML='<p class="stats-scope">No catálogo</p>'
+    +tile("neutral",total,"total",null)+tile("ok",active,"ativos",pct(active))+tile("rejected",rejected,"rejeitados",pct(rejected));
 }
 function typing(){return [...document.querySelectorAll(".cform textarea")].some(t=>t.value.trim()||t===document.activeElement)}
 let pendingRender=false;
 function softRender(changedIds,structural){
   if(structural){ if(typing()){pendingRender=true; changedIds.forEach(refreshAval);} else render(); }
   else changedIds.forEach(refreshAval);
-  stats(filtered());window.dispatchEvent(new Event("ratingschange"));
+  stats();window.dispatchEvent(new Event("ratingschange"));
 }
 async function initDB(){
   {
@@ -305,7 +304,7 @@ const COMMENT_DRAFTS=new Map();
 document.addEventListener('input',e=>{const f=e.target.closest('.cform');if(f&&e.target.tagName==='TEXTAREA')COMMENT_DRAFTS.set(f.dataset.id,{text:e.target.value,person:f.querySelector('select').value});});
 function render(){
   document.querySelectorAll('#list .cform').forEach(f=>{const t=f.querySelector('textarea');if(t.value)COMMENT_DRAFTS.set(f.dataset.id,{text:t.value,person:f.querySelector('select').value});});
-  const a=filtered(); stats(a); renderList(a);
+  const a=filtered(); stats(); renderList(a);
   document.querySelectorAll('#list .cform').forEach(f=>{const draft=COMMENT_DRAFTS.get(f.dataset.id);if(draft?.text){f.querySelector('textarea').value=draft.text;f.querySelector('select').value=draft.person;f.closest('details').open=true;}});
   window.dispatchEvent(new Event("catalogrender"));
 }

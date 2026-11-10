@@ -16,7 +16,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .wrap{max-width:1440px;padding-bottom:150px}
 .eyebrow{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--campus);display:block;margin-bottom:8px}
 header.top{align-items:center;gap:20px;padding:12px 0 20px}
-.stats{width:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;background:var(--surface);border:1px solid var(--line);padding:16px 20px;border-radius:var(--r)}
+.stats{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;background:var(--surface);border:1px solid var(--line);padding:16px 20px;border-radius:var(--r)}
 .stats-scope{grid-column:1/-1;margin:0;color:var(--muted);font-family:var(--body);font-size:.85rem}
 .stat b{font-size:1.65rem}.stat span{text-transform:none;letter-spacing:0;font-size:.86rem}
 .f input,.f select{width:100%;min-height:44px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:9px}

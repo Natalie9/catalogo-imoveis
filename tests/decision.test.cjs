@@ -25,8 +25,14 @@ test('filtro de preço exclui desconhecidos quando há faixa e aceita valores al
 test('lote e área construída não se misturam no filtro',async t=>{
  const a=app(t),r=row('A');r[25]='construída';a.setRows([r,row('B')]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===2);a.input('#lmin','200');assert.equal(a.d.querySelector('.idtag').textContent,'B');a.d.querySelector('#area input[value=construida]').click();assert.equal(a.d.querySelector('.idtag').textContent,'A');
 });
-test('comentário meu respeita autora, filtros individuais e estatísticas reagem às notas',async t=>{
- const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("COMS={A:[{pessoa:'jessica',texto:'texto'}],B:[{pessoa:'natalie',texto:'texto'}]};NOTAS={A:{jessica:5},B:{natalie:4,jessica:3}};ME='natalie';S.onlynat=true;render()");assert.equal(a.d.querySelector('.idtag').textContent,'B');assert.equal(a.d.querySelector('.stat.info b').textContent,'1');a.eval("S.onlynat=false;S.natmin='sem';render()");assert.equal(a.d.querySelector('.idtag').textContent,'A');
+test('comentário meu respeita autora e filtros individuais',async t=>{
+ const a=app(t);await until(()=>a.d.querySelectorAll('.card').length===2);a.eval("COMS={A:[{pessoa:'jessica',texto:'texto'}],B:[{pessoa:'natalie',texto:'texto'}]};NOTAS={A:{jessica:5},B:{natalie:4,jessica:3}};ME='natalie';S.onlynat=true;render()");assert.equal(a.d.querySelector('.idtag').textContent,'B');a.eval("S.onlynat=false;S.natmin='sem';render()");assert.equal(a.d.querySelector('.idtag').textContent,'A');
+});
+test('métricas mostram total, ativos e rejeitados independentemente dos filtros',async t=>{
+ const a=app(t),rejected=row('R');rejected[11]='Rejeitado';a.setRows([row('A'),rejected]);a.refresh();await until(()=>a.d.querySelectorAll('.card').length===1);
+ assert.equal(a.d.querySelector('.stats-scope').textContent,'No catálogo');
+ assert.equal(a.d.querySelector('.stat.neutral b').textContent,'2');assert.equal(a.d.querySelector('.stat.ok b').textContent,'1');assert.equal(a.d.querySelector('.stat.rejected b').textContent,'1');
+ a.input('#q','nenhum resultado');assert.equal(a.d.querySelectorAll('.card').length,0);assert.equal(a.d.querySelector('.stat.neutral b').textContent,'2');
 });
 test('detalhes escapam conteúdo inseguro e mantêm ausentes explícitos',async t=>{
  const a=app(t),r=row('A');r[10]='<img src=x onerror=alert(1)>';r[21]='';a.setRows([r]);a.refresh();await until(()=>a.d.querySelector('.card'));a.d.querySelector('[data-detail]').click();assert.equal(a.d.querySelector('#property-dialog').open,true);assert.match(a.d.querySelector('#dialog-content').textContent,/<img src=x/);assert.equal(a.d.querySelector('#dialog-content [onerror]'),null);assert.match(a.d.querySelector('#dialog-content').textContent,/Não informado/);a.d.querySelector('#dialog-close').click();assert.equal(a.d.querySelector('#property-dialog').open,false);
